@@ -78,7 +78,8 @@ Use the key only for this command (and the weekly CI job). Never print, log, com
 `main` is protected: changes land only via reviewed pull requests. Nothing in CI pushes commits to `main`.
 
 1. **Version bump** — `.github/workflows/version-bump.yml` patch-bumps `package.json` on the PR branch when it still matches `main` (one bump per PR).
-2. **Publish** — after a PR is merged, `.github/workflows/publish.yml` runs `vp check`, `vp test`, `vp pack`, `npm publish --access public --provenance`, and creates a `v*` git tag/release. It does not commit back to `main`.
+2. **CI on PR** — `.github/workflows/ci.yml` runs `vp check`, `vp test`, and `vp pack` on pull requests to gate merge via branch protection.
+3. **Publish on merge** — after a PR is merged, `.github/workflows/publish.yml` runs a chained verify job (`vp check`, `vp test`, `vp pack`) then publishes (`npm publish --access public --provenance`) and creates a `v*` git tag/release. It does not commit back to `main`.
 
 Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC from GitHub Actions). No long-lived `NPM_TOKEN` is stored in the repo.
 
