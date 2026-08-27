@@ -28,7 +28,12 @@ jobs:
         id: check
         run: |
           git fetch origin main
-          MAIN_VERSION=$(git show origin/main:package.json | node -pe "JSON.parse(require('fs').readFileSync(0)).version")
+          if git cat-file -e "origin/main:package.json" 2>/dev/null; then
+            MAIN_VERSION=$(git show origin/main:package.json | node -pe "JSON.parse(require('fs').readFileSync(0)).version")
+          else
+            # First release: main has no package yet; any version on the PR is fine.
+            MAIN_VERSION="0.0.0"
+          fi
           HEAD_VERSION=$(node -pe "require('./package.json').version")
           echo "main_version=$MAIN_VERSION" >> "$GITHUB_OUTPUT"
           echo "head_version=$HEAD_VERSION" >> "$GITHUB_OUTPUT"
