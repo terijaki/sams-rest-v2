@@ -80,7 +80,7 @@ export function createSamsClient(options: CreateSamsClientOptions): SamsClient {
     const fn = sdk[key];
     if (typeof fn !== "function") continue;
     (bound as Record<string, unknown>)[key as string] = (opts?: object) =>
-      (fn as (options: object) => unknown)({ ...(opts ?? {}), client });
+      (fn as (options: object) => unknown)({ ...opts, client });
   }
 
   return { ...bound, client };

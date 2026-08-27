@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { schemaPatches, type SchemaObject } from "./schema-patches";
 
 type PatchableSchema = SchemaObject & {
@@ -132,7 +132,10 @@ describe("schemaPatches", () => {
 
 describe("generate-client.ts", () => {
   it("fetches the public swagger URL and does not reference SAMS_API_KEY as a request header", () => {
-    const source = readFileSync(new URL("../../scripts/generate-client.ts", import.meta.url), "utf8");
+    const source = readFileSync(
+      new URL("../../scripts/generate-client.ts", import.meta.url),
+      "utf8",
+    );
     expect(source).toContain("SAMS_SWAGGER_URL");
     expect(source).toContain("delete process.env.SAMS_API_KEY");
     expect(source).not.toMatch(/headers:[\s\S]{0,200}X-API-Key/);

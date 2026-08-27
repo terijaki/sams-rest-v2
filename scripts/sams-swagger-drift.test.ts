@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import {
   buildSwaggerDriftSection,
   compareSwaggerSnapshots,
@@ -239,8 +239,8 @@ describe("check-sams-swagger-drift CLI", () => {
       );
 
       const sameOutput = execFileSync(
-        process.execPath,
-        ["--import", "tsx", "scripts/check-sams-swagger-drift.ts", committed, regeneratedSame],
+        "bun",
+        ["scripts/check-sams-swagger-drift.ts", committed, regeneratedSame],
         { encoding: "utf8", cwd: process.cwd() },
       );
       const sameResult = JSON.parse(sameOutput) as { hasDrift: boolean; changeCount: number };
@@ -250,8 +250,8 @@ describe("check-sams-swagger-drift CLI", () => {
       writeFileSync(githubOutput, "");
       writeFileSync(githubStepSummary, "");
       const changedOutput = execFileSync(
-        process.execPath,
-        ["--import", "tsx", "scripts/check-sams-swagger-drift.ts", committed, regeneratedChanged],
+        "bun",
+        ["scripts/check-sams-swagger-drift.ts", committed, regeneratedChanged],
         {
           encoding: "utf8",
           cwd: process.cwd(),

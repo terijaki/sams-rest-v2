@@ -20,26 +20,28 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "22"
-          cache: npm
+          node-version: "25"
+          cache: true
+
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: npm ci
+        run: vp install
 
       - name: Snapshot committed source.json
         run: git show HEAD:src/generated/source.json > /tmp/committed-source.json
 
       - name: Regenerate from live spec (no API key)
-        run: npm run generate
+        run: vp run generate
         env:
           SAMS_API_KEY: ""
 
       - name: Detect semantic drift in source.json
         id: diff
         run: |
-          npx tsx scripts/check-sams-swagger-drift.ts \
+          bun scripts/check-sams-swagger-drift.ts \
             /tmp/committed-source.json \
             src/generated/source.json
 
@@ -61,18 +63,20 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "22"
-          cache: npm
+          node-version: "25"
+          cache: true
+
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: npm ci
+        run: vp install
 
       - name: Run bug checks
         env:
           SAMS_API_KEY: ${{ secrets.SAMS_API_KEY }}
-        run: npx tsx scripts/check-sams-bugs.ts > bug-results.json
+        run: bun scripts/check-sams-bugs.ts > bug-results.json
 
       - name: Parse results and set outputs
         id: parse
@@ -123,34 +127,36 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "22"
-          cache: npm
+          node-version: "25"
+          cache: true
+
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: npm ci
+        run: vp install
 
       - name: Regenerate client from live spec (no API key)
         id: regen
-        run: npm run generate
+        run: vp run generate
         env:
           SAMS_API_KEY: ""
 
-      - name: Typecheck
-        id: typecheck
+      - name: Check
+        id: check
         continue-on-error: true
-        run: npm run typecheck
+        run: vp check
 
       - name: Test
         id: test
         continue-on-error: true
-        run: npm test
+        run: vp test
 
-      - name: Build
-        id: build
+      - name: Pack
+        id: pack
         continue-on-error: true
-        run: npm run build
+        run: vp pack
 
       - name: Set result outputs
         id: result
@@ -158,15 +164,15 @@ jobs:
           if [ "${{ steps.regen.outcome }}" = "failure" ]; then
             echo "failed=true" >> "$GITHUB_OUTPUT"
             echo "failure_step=regeneration" >> "$GITHUB_OUTPUT"
-          elif [ "${{ steps.typecheck.outcome }}" = "failure" ]; then
+          elif [ "${{ steps.check.outcome }}" = "failure" ]; then
             echo "failed=true" >> "$GITHUB_OUTPUT"
-            echo "failure_step=typecheck" >> "$GITHUB_OUTPUT"
+            echo "failure_step=check" >> "$GITHUB_OUTPUT"
           elif [ "${{ steps.test.outcome }}" = "failure" ]; then
             echo "failed=true" >> "$GITHUB_OUTPUT"
             echo "failure_step=tests" >> "$GITHUB_OUTPUT"
-          elif [ "${{ steps.build.outcome }}" = "failure" ]; then
+          elif [ "${{ steps.pack.outcome }}" = "failure" ]; then
             echo "failed=true" >> "$GITHUB_OUTPUT"
-            echo "failure_step=build" >> "$GITHUB_OUTPUT"
+            echo "failure_step=pack" >> "$GITHUB_OUTPUT"
           else
             echo "failed=false" >> "$GITHUB_OUTPUT"
             echo "failure_step=" >> "$GITHUB_OUTPUT"
@@ -189,14 +195,20 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - uses: oven-sh/setup-bun@v2
+
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: npm
+          node-version: "25"
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: npm ci
+        run: vp install
 
       - name: Restore regenerated client
         uses: actions/download-artifact@v4
@@ -205,7 +217,7 @@ jobs:
           path: src/generated
 
       - name: Verify restored client
-        run: npm test && npm run build
+        run: vp test && vp pack
 
       - name: Commit regenerated client, bump, and publish
         id: release
@@ -236,13 +248,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "22"
-          cache: npm
+          node-version: "25"
+          cache: true
+
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: npm ci
+        run: vp install
 
       - name: Create GitHub issue
         if: |
@@ -268,4 +282,4 @@ jobs:
           PUBLISH_RESULT: ${{ needs.publish.result }}
           PUBLISHED: ${{ needs.publish.outputs.published }}
           PUBLISHED_VERSION: ${{ needs.publish.outputs.version }}
-        run: npx tsx scripts/sams-notify.ts
+        run: bun scripts/sams-notify.ts

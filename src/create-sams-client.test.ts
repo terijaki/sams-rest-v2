@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { createSamsClient } from "./create-sams-client";
 import { SAMS_DEFAULT_BASE_URL } from "./constants";
 
@@ -11,12 +11,10 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 describe("createSamsClient", () => {
   it("requires a non-empty baseUrl and apiKey without echoing the key", () => {
-    expect(() =>
-      createSamsClient({ baseUrl: "", apiKey: "secret-value" }),
-    ).toThrowError(/baseUrl/);
-    expect(() =>
-      createSamsClient({ baseUrl: SAMS_DEFAULT_BASE_URL, apiKey: "" }),
-    ).toThrowError(/apiKey/);
+    expect(() => createSamsClient({ baseUrl: "", apiKey: "secret-value" })).toThrowError(/baseUrl/);
+    expect(() => createSamsClient({ baseUrl: SAMS_DEFAULT_BASE_URL, apiKey: "" })).toThrowError(
+      /apiKey/,
+    );
 
     try {
       createSamsClient({ baseUrl: SAMS_DEFAULT_BASE_URL, apiKey: "" });

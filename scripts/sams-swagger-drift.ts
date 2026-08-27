@@ -252,7 +252,7 @@ export function buildSwaggerDriftSection(options: {
 
 The upstream spec at \`https://www.volleyball-baden.de/api/v2/swagger.json\` has changed since the last committed snapshot in \`${SOURCE_JSON_PATH}\`.
 
-Run \`npm run generate\` locally (no API key), review \`${SOURCE_JSON_PATH}\` plus the generated client files for downstream impact, then commit the updated files once verified.
+Run \`vp run generate\` locally (no API key), review \`${SOURCE_JSON_PATH}\` plus the generated client files for downstream impact, then commit the updated files once verified.
 ${changeBlock}
 [View workflow run](${runUrl})`;
 }

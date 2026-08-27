@@ -40,7 +40,7 @@ const { data } = await getAllSeasons({ client });
 Regenerate from the **public** swagger document ([API docs](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle)). Do not pass `SAMS_API_KEY` to this step.
 
 ```bash
-npm run generate
+vp run generate
 ```
 
 `@hey-api/openapi-ts` is pinned at **0.99.0**. Schema patches live in `src/codegen/schema-patches.ts` (lifted from vcmuellheim `parser.patch.schemas`).
@@ -48,17 +48,27 @@ npm run generate
 ## Tests
 
 ```bash
-npm test
+vp test
 ```
 
 Unit tests cover client headers, schema patches, generated Zod fixtures, and semantic swagger drift. They do not call the live API and do not need a key.
+
+## Build
+
+Package the library for npm with [Vite+ pack](https://viteplus.dev/guide/pack):
+
+```bash
+vp pack
+```
+
+Requires [Bun](https://bun.sh/) (`packageManager: bun@1.3.14`) and Node.js **22.18+**.
 
 ## Live bug probes
 
 Known upstream bugs are re-checked against the real API:
 
 ```bash
-SAMS_API_KEY=… npm run bugs
+SAMS_API_KEY=… bun run bugs
 ```
 
 Use the key only for this command (and the weekly CI job). Never print, log, commit, or put it in fixtures.
