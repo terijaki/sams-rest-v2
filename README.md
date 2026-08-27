@@ -1,14 +1,22 @@
 # sams-rest-v2
 
-TypeScript client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle) — the backend behind regional volleyball sites such as [volleyball-baden.de](https://www.volleyball-baden.de). Install the package, configure your API key once, and call typed methods for seasons, teams, leagues, matches, and standings instead of hand-rolling HTTP requests.
+TypeScript client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle) — the shared backend used by volleyball federations and leagues (Bundesliga, DVV, state associations, and more). Each federation runs on its own host; point `baseUrl` at `https://<host>/api/v2` for yours (see the [official host list](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle#Abfragen)). Install the package, set your API key, and call typed methods for seasons, teams, leagues, matches, and standings.
 
 ## Install
 
-Requires Node.js **22.18+**.
+```bash
+pnpm add sams-rest-v2
+```
 
 ```bash
-npm install sams-rest-v2
+bun add sams-rest-v2
 ```
+
+```bash
+deno add npm:sams-rest-v2
+```
+
+Requires Node.js **22.18+** (pnpm/Bun) or a recent Deno release.
 
 ## Quick start
 
@@ -16,7 +24,7 @@ npm install sams-rest-v2
 import { createSamsClient } from "sams-rest-v2";
 
 const sams = createSamsClient({
-  baseUrl: "https://www.volleyball-baden.de/api/v2",
+  baseUrl: "https://<your-federation-host>/api/v2",
   apiKey: process.env.SAMS_API_KEY!,
 });
 
@@ -46,7 +54,7 @@ const { data } = await getAllSeasons({ client });
 const parsed = zTeamDto.parse(data);
 ```
 
-Constants are exported for convenience:
+Constants are exported for convenience (defaults to one federation host — override `baseUrl` for yours):
 
 ```ts
 import { SAMS_DEFAULT_BASE_URL, SAMS_SWAGGER_URL } from "sams-rest-v2";
