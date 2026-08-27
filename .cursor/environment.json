@@ -1,0 +1,4 @@
+{
+  "name": "sams-rest-v2",
+  "install": "VP_NODE_MANAGER=no curl -fsSL https://vite.plus | bash && vp install --frozen-lockfile"
+}

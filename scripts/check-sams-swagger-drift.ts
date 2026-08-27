@@ -1,9 +1,9 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 /**
  * Compares committed vs regenerated SAMS swagger source.json with key-order-insensitive equality.
  *
  * Usage:
- *   npx tsx scripts/check-sams-swagger-drift.ts <committed.json> <regenerated.json>
+ *   bun scripts/check-sams-swagger-drift.ts <committed.json> <regenerated.json>
  *
  * Prints JSON: { hasDrift, changeCount, summaryMarkdown }
  * When GITHUB_OUTPUT / GITHUB_STEP_SUMMARY are set (Actions), also appends job outputs and the step summary.
@@ -26,7 +26,7 @@ const regeneratedPath = process.argv[3];
 
 if (!committedPath || !regeneratedPath) {
   console.error(
-    "Usage: npx tsx scripts/check-sams-swagger-drift.ts <committed.json> <regenerated.json>",
+    "Usage: bun scripts/check-sams-swagger-drift.ts <committed.json> <regenerated.json>",
   );
   process.exit(1);
 }

@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 permissions:
@@ -13,7 +11,7 @@ jobs:
     name: Check, test & pack
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: voidzero-dev/setup-vp@v1
         with:
@@ -29,12 +27,15 @@ jobs:
       - name: Pack
         run: vp pack
 
+      - name: Audit production dependencies
+        run: vp pm audit -- --prod
+
   api:
     name: Live SAMS API
     needs: unit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: voidzero-dev/setup-vp@v1
         with:
@@ -44,4 +45,4 @@ jobs:
       - name: Live API tests
         env:
           SAMS_API_KEY: ${{ secrets.SAMS_API_KEY }}
-        run: bun run test:api
+        run: vp run test:api
