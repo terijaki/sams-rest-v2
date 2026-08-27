@@ -25,11 +25,6 @@ jobs:
           node-version: "25"
           cache: true
 
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: vp install
-
       - name: Snapshot committed source.json
         run: git show HEAD:src/generated/source.json > /tmp/committed-source.json
 
@@ -67,11 +62,6 @@ jobs:
         with:
           node-version: "25"
           cache: true
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: vp install
 
       - name: Run bug checks
         env:
@@ -131,11 +121,6 @@ jobs:
         with:
           node-version: "25"
           cache: true
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: vp install
 
       - name: Regenerate client from live spec (no API key)
         id: regen
@@ -200,15 +185,10 @@ jobs:
           node-version: "25"
           cache: true
 
-      - uses: oven-sh/setup-bun@v2
-
       - uses: actions/setup-node@v4
         with:
           node-version: "25"
           registry-url: https://registry.npmjs.org
-
-      - name: Install dependencies
-        run: vp install
 
       - name: Restore regenerated client
         uses: actions/download-artifact@v4
@@ -252,11 +232,6 @@ jobs:
         with:
           node-version: "25"
           cache: true
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: vp install
 
       - name: Create GitHub issue
         if: |
