@@ -31,7 +31,8 @@ const failureStep = process.env.FAILURE_STEP ?? "";
 const swaggerJobFailed = process.env.SWAGGER_DRIFT_RESULT === "failure";
 const bugCheckJobFailed = process.env.BUG_CHECK_RESULT === "failure";
 const regenJobFailed = process.env.REGENERATE_RESULT === "failure";
-const commitDriftJobFailed = process.env.COMMIT_DRIFT_RESULT === "failure";
+const prDriftJobFailed = process.env.PR_DRIFT_RESULT === "failure";
+const driftPrUrl = process.env.DRIFT_PR_URL ?? "";
 const driftSummaryMarkdown = process.env.DRIFT_SUMMARY_MARKDOWN ?? "";
 
 const bugDescriptions: Record<number, string> = {
@@ -68,7 +69,7 @@ if (hasDrift) {
       summaryMarkdown: driftSummaryMarkdown,
     })}
 
-The regenerated client was committed to \`main\` when verification passed. The [\`publish.yml\`](${runUrl.replace(/\/runs\/\d+$/, "")}/blob/main/.github/workflows/publish.yml) workflow will patch-bump and publish on that push.`,
+${driftPrUrl ? `A pull request was opened/updated with the regenerated client: ${driftPrUrl}\n\nReview, approve, and merge it. The version-bump workflow will patch-bump on the PR branch; [\`publish.yml\`](${runUrl.replace(/\/runs\/\d+$/, "")}/blob/main/.github/workflows/publish.yml) publishes after merge.` : "Verification passed; check the workflow run for the drift PR link."}`,
   );
 }
 
@@ -106,10 +107,10 @@ if (bugCheckJobFailed) {
   );
 }
 
-if (commitDriftJobFailed) {
-  titleParts.push("❌ drift commit failed");
+if (prDriftJobFailed) {
+  titleParts.push("❌ drift PR failed");
   sections.push(
-    `## ❌ Drift Commit Failed\n\nSemantic drift was detected and verification passed, but pushing the regenerated client to \`main\` failed.\n\n[View run](${runUrl})`,
+    `## ❌ Drift PR Failed\n\nSemantic drift was detected and verification passed, but opening/updating the drift pull request failed.\n\n[View run](${runUrl})`,
   );
 }
 

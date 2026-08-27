@@ -75,12 +75,10 @@ Use the key only for this command (and the weekly CI job). Never print, log, com
 
 ## Publishing
 
-Every push to `main` (except release commits tagged `chore(release): …`) runs `.github/workflows/publish.yml`:
+`main` is protected: changes land only via reviewed pull requests. Nothing in CI pushes commits to `main`.
 
-1. `vp check`, `vp test`, `vp pack`
-2. `npm version patch`
-3. `npm publish --access public --provenance`
-4. Push the version bump and git tag to `main`
+1. **Version bump** — `.github/workflows/version-bump.yml` patch-bumps `package.json` on the PR branch when it still matches `main` (one bump per PR).
+2. **Publish** — after a PR is merged, `.github/workflows/publish.yml` runs `vp check`, `vp test`, `vp pack`, `npm publish --access public --provenance`, and creates a `v*` git tag/release. It does not commit back to `main`.
 
 Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC from GitHub Actions). No long-lived `NPM_TOKEN` is stored in the repo.
 
@@ -99,7 +97,7 @@ Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishe
 
 1. **Swagger drift** — regenerate from the public spec (no key) and compare `src/generated/source.json` semantically (key order ignored).
 2. **Live bug probes** — uses the `SAMS_API_KEY` repository secret.
-3. **Auto-commit drift** — if upstream changed and verification passed, push regenerated `src/generated` to `main` (the publish workflow then releases a new patch version).
+3. **Drift PR** — if upstream changed and verification passed, open or update a `sams-swagger-drift` pull request for maintainer review (merge triggers version bump + publish like any other PR).
 
 Repository secret:
 

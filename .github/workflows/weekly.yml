@@ -48,21 +48,23 @@ jobs:
           path: src/generated
           include-hidden-files: true
 
-  commit-drift:
-    name: Commit swagger drift to main
+  pr-drift:
+    name: Open PR for swagger drift
     needs: [swagger-drift, regenerate]
     if: |
       always() &&
-      github.ref == 'refs/heads/main' &&
       needs.swagger-drift.outputs.has_drift == 'true' &&
       needs.regenerate.outputs.failed == 'false'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
+    outputs:
+      pr_url: ${{ steps.pr.outputs.pr_url }}
     steps:
       - uses: actions/checkout@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - uses: voidzero-dev/setup-vp@v1
         with:
@@ -75,17 +77,33 @@ jobs:
           name: generated-client
           path: src/generated
 
-      - name: Commit and push regenerated files
+      - name: Open or update drift PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          BRANCH="sams-swagger-drift"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B "$BRANCH" origin/main
           git add src/generated
           if git diff --cached --quiet; then
             echo "No generated-file changes after artifact restore."
             exit 0
           fi
           git commit -m "fix: regenerate SAMS client from upstream swagger"
-          git push origin HEAD
+          git push -u origin "$BRANCH" --force-with-lease
+
+          PR_URL=$(gh pr list --head "$BRANCH" --base main --state open --json url -q '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            PR_URL=$(gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "fix: regenerate SAMS client from upstream swagger" \
+              --body "Automated weekly update from upstream OpenAPI drift. Review, approve, and merge to release.")
+          fi
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
 
   bug-check:
     name: Check Known API Bugs
@@ -204,7 +222,7 @@ jobs:
 
   notify:
     name: Create Issue if Actionable
-    needs: [swagger-drift, bug-check, regenerate, commit-drift]
+    needs: [swagger-drift, bug-check, regenerate, pr-drift]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -223,7 +241,7 @@ jobs:
           needs.swagger-drift.result == 'failure' ||
           needs.bug-check.result == 'failure' ||
           needs.regenerate.result == 'failure' ||
-          needs.commit-drift.result == 'failure'
+          needs.pr-drift.result == 'failure'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HAS_DRIFT: ${{ needs.swagger-drift.outputs.has_drift }}
@@ -236,5 +254,6 @@ jobs:
           SWAGGER_DRIFT_RESULT: ${{ needs.swagger-drift.result }}
           BUG_CHECK_RESULT: ${{ needs.bug-check.result }}
           REGENERATE_RESULT: ${{ needs.regenerate.result }}
-          COMMIT_DRIFT_RESULT: ${{ needs.commit-drift.result }}
+          PR_DRIFT_RESULT: ${{ needs.pr-drift.result }}
+          DRIFT_PR_URL: ${{ needs.pr-drift.outputs.pr_url }}
         run: bun scripts/sams-notify.ts

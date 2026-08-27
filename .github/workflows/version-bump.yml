@@ -1,0 +1,56 @@
+name: Version bump
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: version-bump-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Bump patch version on PR branch
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Skip if version already bumped above main
+        id: check
+        run: |
+          git fetch origin main
+          MAIN_VERSION=$(git show origin/main:package.json | node -pe "JSON.parse(require('fs').readFileSync(0)).version")
+          HEAD_VERSION=$(node -pe "require('./package.json').version")
+          echo "main_version=$MAIN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "head_version=$HEAD_VERSION" >> "$GITHUB_OUTPUT"
+          node -e "
+            const main = process.argv[1].split('.').map(Number);
+            const head = process.argv[2].split('.').map(Number);
+            const cmp = (a, b) => {
+              for (let i = 0; i < 3; i++) {
+                if (a[i] !== b[i]) return a[i] - b[i];
+              }
+              return 0;
+            };
+            process.stdout.write(cmp(head, main) > 0 ? 'already_bumped' : 'needs_bump');
+          " "$MAIN_VERSION" "$HEAD_VERSION" > /tmp/bump-state.txt
+          echo "state=$(cat /tmp/bump-state.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Bump patch version
+        if: steps.check.outputs.state == 'needs_bump'
+        run: |
+          npm version patch --no-git-tag-version
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore(release): bump version for publish"
+          git push origin HEAD:${{ github.head_ref }}
