@@ -13,12 +13,14 @@ A **generated npm package** (`sams-rest-v2`) providing a TypeScript fetch SDK, t
 
 Use **Vite+ (`vp`)** as the dev entry point. It resolves the configured package manager (bun).
 
-| Do                                               | Don't                                                |
-| ------------------------------------------------ | ---------------------------------------------------- |
-| `vp test`, `vp check`, `vp pack`                 | `npm run test`, `bun run test`                       |
-| `vp run generate`, `vp run bugs`, `vp run smoke` | Direct `bun ./scripts/...` in docs/CI (use `vp run`) |
-| `vp install --frozen-lockfile`                   | `bun install` / `npm ci` in docs                     |
-| `npm publish` in `publish.yml` only              | `bun publish` (no OIDC/provenance support)           |
+| Do                                                 | Don't                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------- |
+| `vp check`, `vp check --fix`, `vp test`, `vp pack` | Wrapper scripts like `"check": "vp check"` in package.json |
+| `vp run generate`, `vp run bugs`, `vp run smoke`   | Direct `bun ./scripts/...` in docs/CI (use `vp run`)       |
+| `vp install --frozen-lockfile`                     | `bun install` / `npm ci` in docs                           |
+| `npm publish` in `publish.yml` only                | `bun publish` (no OIDC/provenance support)                 |
+
+Do not add `package.json` scripts that mirror Vite+ built-ins — agents and CI call built-ins directly; wrapper scripts add noise and can trigger collision warnings (`vpr check` vs `vp check`).
 
 TypeScript scripts in `scripts/` are executed by **bun** via `package.json` scripts, not by a separate `tsx` dependency.
 

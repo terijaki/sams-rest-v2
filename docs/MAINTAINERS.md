@@ -21,6 +21,7 @@ Cloud Agents bootstrap via `.cursor/environment.json` (installs `vp`, then `vp i
 | Command                 | Purpose                                                                               |
 | ----------------------- | ------------------------------------------------------------------------------------- |
 | `vp check`              | Format, lint, and type-check                                                          |
+| `vp check --fix`        | Same as `vp check`, with autofix                                                      |
 | `vp test`               | Unit tests + MSW contract suite (no live API, no key)                                 |
 | `vp run test:api`       | Live SDK graph test through production SAMS (needs key)                               |
 | `vp pack`               | Build library to `dist/`                                                              |
@@ -30,7 +31,7 @@ Cloud Agents bootstrap via `.cursor/environment.json` (installs `vp`, then `vp i
 | `vp run smoke`          | Fast live header/key check (`src/live/sams-smoke.live.test.ts`, needs key)            |
 | `vp run swagger:drift`  | Compare two `source.json` snapshots (CI helper)                                       |
 
-Use `vp run <script>` for `package.json` scripts. Use built-in `vp test`, `vp check`, `vp pack` directly — not `npm run` / `bun run`.
+Use `vp run <script>` for custom `package.json` scripts only. Call built-in `vp test`, `vp check`, `vp pack` directly — not `npm run`, `bun run`, or wrapper scripts. Do not add scripts that mirror built-in names (`check`, `test`, `pack`); it triggers Vite+ collision warnings in CI logs.
 
 TypeScript maintenance scripts run via **bun** (`bun ./scripts/...`), invoked through `vp run`.
 

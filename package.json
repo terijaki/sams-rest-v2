@@ -42,14 +42,8 @@
     "provenance": true
   },
   "scripts": {
-    "build": "vp pack",
-    "pack": "vp pack",
     "generate": "bun ./scripts/generate-client.ts",
-    "test": "vp test",
     "test:api": "SAMS_LIVE=1 vp test src/live",
-    "typecheck": "vp check",
-    "check": "vp check",
-    "check:fix": "vp check --fix",
     "bugs": "bun ./scripts/check-sams-bugs.ts",
     "smoke": "SAMS_LIVE=1 vp test src/live/sams-smoke.live.test.ts",
     "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
