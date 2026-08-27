@@ -60,7 +60,7 @@ vp run smoke   # public + protected endpoint; fails on HTTP 403
 
 Fixture UUIDs for live checks: `src/test-support/live-fixtures.ts` (also referenced in [BUGS.md](BUGS.md)).
 
-Baseline endpoint manifest (`src/test-support/baseline-endpoints.ts`): SDK operations a typical club-site integration needs (seasons, leagues, teams, rosters, rankings, matches, associations, sportsclubs). The unit test `baseline-endpoints.test.ts` asserts the graph step list calls each one. Graph suites use `describeSamsApiGraphSuite` so Vitest reports one case per SDK operation (e.g. `getTeamRosterByTeamUuid`) instead of a single monolithic pass/fail.
+Baseline endpoint manifest (`src/test-support/baseline-endpoints.ts`): SDK operations a typical club-site integration needs. CI appends a job summary (`scripts/write-ci-test-summary.ts`) listing each graph endpoint case after `vp test` / live tests. Graph suites use `describeSamsApiGraphSuite` so Vitest reports one case per SDK operation.
 
 ### Tests vs scripts
 

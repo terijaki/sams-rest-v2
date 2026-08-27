@@ -54,6 +54,7 @@
     "smoke": "SAMS_LIVE=1 vp test src/live/sams-smoke.live.test.ts",
     "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
     "notify": "bun ./scripts/sams-notify.ts",
+    "write-test-summary": "bun ./scripts/write-ci-test-summary.ts",
     "prepublishOnly": "vp pack"
   },
   "dependencies": {
