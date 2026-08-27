@@ -135,6 +135,8 @@ export const fixtures = {
     seasonUuid: ids.season,
     associationUuid: ids.association,
     leagueHierarchyUuid: ids.hierarchy,
+    superCompetitionUuid: null,
+    latestResultUpdate: null,
   },
   superCompetition: {
     uuid: ids.superCompetition,

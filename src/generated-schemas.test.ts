@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 import {
+  zCompetitionDto,
   zLeagueHierarchyDto,
   zLeagueMatchDto,
   zLeagueRankingsEntryDto,
@@ -66,5 +67,16 @@ describe("patched generated Zod schemas", () => {
     expect(zSportsclubDto.parse({ uuid: "club-1", name: "VC Test", logo: null }).uuid).toBe(
       "club-1",
     );
+  });
+
+  it("accepts null superCompetitionUuid and latestResultUpdate on competitions", () => {
+    const parsed = zCompetitionDto.parse({
+      uuid: "competition-1",
+      name: "Pokal",
+      superCompetitionUuid: null,
+      latestResultUpdate: null,
+    });
+    expect(parsed.superCompetitionUuid).toBeNull();
+    expect(parsed.latestResultUpdate).toBeNull();
   });
 });

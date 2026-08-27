@@ -275,28 +275,28 @@ export type CompetitionDto = {
     uuid?: string;
     _links?: {
         [key: string]: LinkDto;
-    };
+    } | null;
     _embedded?: {
         [key: string]: {
             [key: string]: unknown;
         };
-    };
+    } | null;
     attributes?: {
         [key: string]: JsonNode;
-    };
-    name?: string;
-    shortName?: string;
+    } | null;
+    name?: string | null;
+    shortName?: string | null;
     gender?: 'MALE' | 'FEMALE' | 'MIXED';
-    leagueHierarchyUuid?: string;
-    seasonUuid?: string;
-    associationUuid?: string;
-    latestResultUpdate?: string;
-    latestStructuralUpdate?: string;
-    scoreTableCalculationMode?: string;
+    leagueHierarchyUuid?: string | null;
+    seasonUuid?: string | null;
+    associationUuid?: string | null;
+    latestResultUpdate?: string | null;
+    latestStructuralUpdate?: string | null;
+    scoreTableCalculationMode?: string | null;
     /**
      * If this competition is the sub-competition of a super competition then this UUID points to this super competition.
      */
-    superCompetitionUuid?: string;
+    superCompetitionUuid?: string | null;
 };
 
 export type CompetitionPage = {
@@ -327,24 +327,24 @@ export type LeagueDto = {
     uuid?: string;
     _links?: {
         [key: string]: LinkDto;
-    };
+    } | null;
     _embedded?: {
         [key: string]: {
             [key: string]: unknown;
         };
-    };
+    } | null;
     attributes?: {
         [key: string]: JsonNode;
-    };
-    name?: string;
-    shortName?: string;
+    } | null;
+    name?: string | null;
+    shortName?: string | null;
     gender?: 'MALE' | 'FEMALE' | 'MIXED';
-    leagueHierarchyUuid?: string;
-    seasonUuid?: string;
-    associationUuid?: string;
-    latestResultUpdate?: string;
-    latestStructuralUpdate?: string;
-    scoreTableCalculationMode?: string;
+    leagueHierarchyUuid?: string | null;
+    seasonUuid?: string | null;
+    associationUuid?: string | null;
+    latestResultUpdate?: string | null;
+    latestStructuralUpdate?: string | null;
+    scoreTableCalculationMode?: string | null;
 };
 
 export type LeaguePage = {
@@ -375,28 +375,28 @@ export type SuperCompetitionDto = {
     uuid?: string;
     _links?: {
         [key: string]: LinkDto;
-    };
+    } | null;
     _embedded?: {
         [key: string]: {
             [key: string]: unknown;
         };
-    };
+    } | null;
     attributes?: {
         [key: string]: JsonNode;
-    };
-    name?: string;
-    shortName?: string;
+    } | null;
+    name?: string | null;
+    shortName?: string | null;
     gender?: 'MALE' | 'FEMALE' | 'MIXED';
-    leagueHierarchyUuid?: string;
-    seasonUuid?: string;
-    associationUuid?: string;
-    latestResultUpdate?: string;
-    latestStructuralUpdate?: string;
-    scoreTableCalculationMode?: string;
+    leagueHierarchyUuid?: string | null;
+    seasonUuid?: string | null;
+    associationUuid?: string | null;
+    latestResultUpdate?: string | null;
+    latestStructuralUpdate?: string | null;
+    scoreTableCalculationMode?: string | null;
     /**
      * If this competition is the sub-competition of a super competition then this UUID points to this super competition.
      */
-    superCompetitionUuid?: string;
+    superCompetitionUuid?: string | null;
 };
 
 export type SuperCompetitionPage = {

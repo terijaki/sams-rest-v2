@@ -267,25 +267,23 @@ export const zCompetitionDto = z.object({
     uuid: z.string().register(z.globalRegistry, {
         description: 'Entity unique identifier'
     }).optional(),
-    _links: z.record(z.string(), zLinkDto).optional(),
-    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
-    attributes: z.record(z.string(), zJsonNode).optional(),
-    name: z.string().optional(),
-    shortName: z.string().optional(),
+    _links: z.record(z.string(), zLinkDto).nullish(),
+    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).nullish(),
+    attributes: z.record(z.string(), zJsonNode).nullish(),
+    name: z.string().nullish(),
+    shortName: z.string().nullish(),
     gender: z.enum([
         'MALE',
         'FEMALE',
         'MIXED'
     ]).optional(),
-    leagueHierarchyUuid: z.string().optional(),
-    seasonUuid: z.string().optional(),
-    associationUuid: z.string().optional(),
-    latestResultUpdate: z.iso.datetime({ offset: true, local: true }).optional(),
-    latestStructuralUpdate: z.iso.datetime({ offset: true, local: true }).optional(),
-    scoreTableCalculationMode: z.string().optional(),
-    superCompetitionUuid: z.string().register(z.globalRegistry, {
-        description: 'If this competition is the sub-competition of a super competition then this UUID points to this super competition.'
-    }).optional()
+    leagueHierarchyUuid: z.string().nullish(),
+    seasonUuid: z.string().nullish(),
+    associationUuid: z.string().nullish(),
+    latestResultUpdate: z.iso.datetime({ offset: true, local: true }).nullish(),
+    latestStructuralUpdate: z.iso.datetime({ offset: true, local: true }).nullish(),
+    scoreTableCalculationMode: z.string().nullish(),
+    superCompetitionUuid: z.string().nullish()
 });
 
 export const zCompetitionPage = z.object({
@@ -305,22 +303,22 @@ export const zLeagueDto = z.object({
     uuid: z.string().register(z.globalRegistry, {
         description: 'Entity unique identifier'
     }).optional(),
-    _links: z.record(z.string(), zLinkDto).optional(),
-    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
-    attributes: z.record(z.string(), zJsonNode).optional(),
-    name: z.string().optional(),
-    shortName: z.string().optional(),
+    _links: z.record(z.string(), zLinkDto).nullish(),
+    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).nullish(),
+    attributes: z.record(z.string(), zJsonNode).nullish(),
+    name: z.string().nullish(),
+    shortName: z.string().nullish(),
     gender: z.enum([
         'MALE',
         'FEMALE',
         'MIXED'
     ]).optional(),
-    leagueHierarchyUuid: z.string().optional(),
-    seasonUuid: z.string().optional(),
-    associationUuid: z.string().optional(),
-    latestResultUpdate: z.iso.datetime({ offset: true, local: true }).optional(),
-    latestStructuralUpdate: z.iso.datetime({ offset: true, local: true }).optional(),
-    scoreTableCalculationMode: z.string().optional()
+    leagueHierarchyUuid: z.string().nullish(),
+    seasonUuid: z.string().nullish(),
+    associationUuid: z.string().nullish(),
+    latestResultUpdate: z.iso.datetime({ offset: true, local: true }).nullish(),
+    latestStructuralUpdate: z.iso.datetime({ offset: true, local: true }).nullish(),
+    scoreTableCalculationMode: z.string().nullish()
 });
 
 export const zLeaguePage = z.object({
@@ -340,25 +338,23 @@ export const zSuperCompetitionDto = z.object({
     uuid: z.string().register(z.globalRegistry, {
         description: 'Entity unique identifier'
     }).optional(),
-    _links: z.record(z.string(), zLinkDto).optional(),
-    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
-    attributes: z.record(z.string(), zJsonNode).optional(),
-    name: z.string().optional(),
-    shortName: z.string().optional(),
+    _links: z.record(z.string(), zLinkDto).nullish(),
+    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).nullish(),
+    attributes: z.record(z.string(), zJsonNode).nullish(),
+    name: z.string().nullish(),
+    shortName: z.string().nullish(),
     gender: z.enum([
         'MALE',
         'FEMALE',
         'MIXED'
     ]).optional(),
-    leagueHierarchyUuid: z.string().optional(),
-    seasonUuid: z.string().optional(),
-    associationUuid: z.string().optional(),
-    latestResultUpdate: z.iso.datetime({ offset: true, local: true }).optional(),
-    latestStructuralUpdate: z.iso.datetime({ offset: true, local: true }).optional(),
-    scoreTableCalculationMode: z.string().optional(),
-    superCompetitionUuid: z.string().register(z.globalRegistry, {
-        description: 'If this competition is the sub-competition of a super competition then this UUID points to this super competition.'
-    }).optional()
+    leagueHierarchyUuid: z.string().nullish(),
+    seasonUuid: z.string().nullish(),
+    associationUuid: z.string().nullish(),
+    latestResultUpdate: z.iso.datetime({ offset: true, local: true }).nullish(),
+    latestStructuralUpdate: z.iso.datetime({ offset: true, local: true }).nullish(),
+    scoreTableCalculationMode: z.string().nullish(),
+    superCompetitionUuid: z.string().nullish()
 });
 
 export const zSuperCompetitionPage = z.object({

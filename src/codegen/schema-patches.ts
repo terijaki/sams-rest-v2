@@ -213,4 +213,61 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
+  CompetitionDto: (schema) => {
+    if (!schema.properties) return;
+    for (const [key, property] of Object.entries(schema.properties)) {
+      const value = asSchemaProperty(property);
+      if (!value) continue;
+      switch (key) {
+        case "uuid":
+          value.nullable = false;
+          break;
+        case "superCompetitionUuid":
+        case "latestResultUpdate":
+        case "latestStructuralUpdate":
+          // Live API returns null when unset.
+          value.nullable = true;
+          break;
+        default:
+          value.nullable = true;
+      }
+    }
+  },
+  SuperCompetitionDto: (schema) => {
+    if (!schema.properties) return;
+    for (const [key, property] of Object.entries(schema.properties)) {
+      const value = asSchemaProperty(property);
+      if (!value) continue;
+      switch (key) {
+        case "uuid":
+          value.nullable = false;
+          break;
+        case "superCompetitionUuid":
+        case "latestResultUpdate":
+        case "latestStructuralUpdate":
+          value.nullable = true;
+          break;
+        default:
+          value.nullable = true;
+      }
+    }
+  },
+  LeagueDto: (schema) => {
+    if (!schema.properties) return;
+    for (const [key, property] of Object.entries(schema.properties)) {
+      const value = asSchemaProperty(property);
+      if (!value) continue;
+      switch (key) {
+        case "uuid":
+          value.nullable = false;
+          break;
+        case "latestResultUpdate":
+        case "latestStructuralUpdate":
+          value.nullable = true;
+          break;
+        default:
+          value.nullable = true;
+      }
+    }
+  },
 };

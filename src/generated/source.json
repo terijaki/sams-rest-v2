@@ -5204,31 +5204,37 @@
         "properties": {
           "uuid": {
             "type": "string",
-            "description": "Entity unique identifier"
+            "description": "Entity unique identifier",
+            "nullable": false
           },
           "_links": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/LinkDto"
-            }
+            },
+            "nullable": true
           },
           "_embedded": {
             "type": "object",
             "additionalProperties": {
               "type": "object"
-            }
+            },
+            "nullable": true
           },
           "attributes": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/JsonNode"
-            }
+            },
+            "nullable": true
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "shortName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "gender": {
             "type": "string",
@@ -5236,31 +5242,39 @@
               "MALE",
               "FEMALE",
               "MIXED"
-            ]
+            ],
+            "nullable": true
           },
           "leagueHierarchyUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "seasonUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "associationUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "latestResultUpdate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "latestStructuralUpdate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "scoreTableCalculationMode": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "superCompetitionUuid": {
             "type": "string",
-            "description": "If this competition is the sub-competition of a super competition then this UUID points to this super competition."
+            "description": "If this competition is the sub-competition of a super competition then this UUID points to this super competition.",
+            "nullable": true
           }
         }
       },
@@ -5319,31 +5333,37 @@
         "properties": {
           "uuid": {
             "type": "string",
-            "description": "Entity unique identifier"
+            "description": "Entity unique identifier",
+            "nullable": false
           },
           "_links": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/LinkDto"
-            }
+            },
+            "nullable": true
           },
           "_embedded": {
             "type": "object",
             "additionalProperties": {
               "type": "object"
-            }
+            },
+            "nullable": true
           },
           "attributes": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/JsonNode"
-            }
+            },
+            "nullable": true
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "shortName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "gender": {
             "type": "string",
@@ -5351,27 +5371,34 @@
               "MALE",
               "FEMALE",
               "MIXED"
-            ]
+            ],
+            "nullable": true
           },
           "leagueHierarchyUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "seasonUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "associationUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "latestResultUpdate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "latestStructuralUpdate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "scoreTableCalculationMode": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -5430,31 +5457,37 @@
         "properties": {
           "uuid": {
             "type": "string",
-            "description": "Entity unique identifier"
+            "description": "Entity unique identifier",
+            "nullable": false
           },
           "_links": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/LinkDto"
-            }
+            },
+            "nullable": true
           },
           "_embedded": {
             "type": "object",
             "additionalProperties": {
               "type": "object"
-            }
+            },
+            "nullable": true
           },
           "attributes": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/JsonNode"
-            }
+            },
+            "nullable": true
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "shortName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "gender": {
             "type": "string",
@@ -5462,31 +5495,39 @@
               "MALE",
               "FEMALE",
               "MIXED"
-            ]
+            ],
+            "nullable": true
           },
           "leagueHierarchyUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "seasonUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "associationUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "latestResultUpdate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "latestStructuralUpdate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "scoreTableCalculationMode": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "superCompetitionUuid": {
             "type": "string",
-            "description": "If this competition is the sub-competition of a super competition then this UUID points to this super competition."
+            "description": "If this competition is the sub-competition of a super competition then this UUID points to this super competition.",
+            "nullable": true
           }
         }
       },
