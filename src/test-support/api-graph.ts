@@ -1,8 +1,13 @@
 import type { SamsClient } from "../create-sams-client";
 
 const PAGE_SIZE = 5;
+const DISCOVERY_PAGE_SIZE = 100;
 
 type UuidCarrier = { uuid?: string };
+
+function pageItems<T>(page: { content?: T[] } | T[] | undefined): T[] {
+  return Array.isArray(page) ? page : (page?.content ?? []);
+}
 
 function firstUuid(items: UuidCarrier[] | undefined, label: string): string {
   const uuid = items?.find((item) => item.uuid)?.uuid;
@@ -16,8 +21,19 @@ function firstFromPage<T extends UuidCarrier>(
   page: { content?: T[] } | T[] | undefined,
   label: string,
 ): string {
-  const items = Array.isArray(page) ? page : page?.content;
-  return firstUuid(items, label);
+  return firstUuid(pageItems(page), label);
+}
+
+async function firstUuidFromCalls(
+  label: string,
+  calls: Array<() => Promise<{ content?: UuidCarrier[] } | UuidCarrier[] | undefined>>,
+): Promise<string> {
+  for (const call of calls) {
+    const page = await call();
+    const uuid = pageItems(page).find((item) => item.uuid)?.uuid;
+    if (uuid) return uuid;
+  }
+  throw new Error(`No ${label} uuid found in live response`);
 }
 
 /**
@@ -34,53 +50,91 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
 
   const { data: hierarchiesForSeason } = await sams.getLeagueHierarchiesForSeason({
     path: { uuid: seasonUuid },
-    query: { size: PAGE_SIZE },
+    query: { size: DISCOVERY_PAGE_SIZE },
   });
-  const hierarchyUuid = firstFromPage(hierarchiesForSeason, "league hierarchy");
+  const hierarchies = pageItems(hierarchiesForSeason);
+  const hierarchyUuid = firstUuid(hierarchies, "league hierarchy");
 
   await sams.getLeagueHierarchyByUuid({ path: { uuid: hierarchyUuid } });
 
-  const { data: leaguesByHierarchy } = await sams.getLeaguesByLeagueHierarchy({
-    path: { uuid: hierarchyUuid },
-    query: { size: PAGE_SIZE },
-  });
-  const leagueUuid = firstFromPage(leaguesByHierarchy, "league");
+  const leagueUuid = await firstUuidFromCalls("league", [
+    ...hierarchies
+      .filter((hierarchy): hierarchy is UuidCarrier & { uuid: string } => Boolean(hierarchy.uuid))
+      .map(
+        (hierarchy) => () =>
+          sams
+            .getLeaguesByLeagueHierarchy({
+              path: { uuid: hierarchy.uuid },
+              query: { size: PAGE_SIZE },
+            })
+            .then(({ data }) => data),
+      ),
+    () =>
+      sams
+        .getAllLeagues({ query: { size: PAGE_SIZE, season: seasonUuid } })
+        .then(({ data }) => data),
+  ]);
 
-  const { data: competitionsByHierarchy } = await sams.getCompetitionsByLeagueHierarchy({
-    path: { uuid: hierarchyUuid },
-    query: { size: PAGE_SIZE },
-  });
-  const competitionUuid = firstFromPage(competitionsByHierarchy, "competition");
+  const competitionUuid = await firstUuidFromCalls("competition", [
+    () =>
+      sams
+        .getCompetitionsByLeagueHierarchy({
+          path: { uuid: hierarchyUuid },
+          query: { size: PAGE_SIZE },
+        })
+        .then(({ data }) => data),
+    () =>
+      sams
+        .getAllCompetitions({ query: { size: PAGE_SIZE, season: seasonUuid } })
+        .then(({ data }) => data),
+  ]);
 
-  const { data: superCompetitionsByHierarchy } = await sams.getSuperCompetitionsByLeagueHierarchy({
-    path: { uuid: hierarchyUuid },
-    query: { size: PAGE_SIZE },
-  });
-  const superCompetitionUuid = firstFromPage(superCompetitionsByHierarchy, "super-competition");
+  const superCompetitionUuid = await firstUuidFromCalls("super-competition", [
+    () =>
+      sams
+        .getSuperCompetitionsByLeagueHierarchy({
+          path: { uuid: hierarchyUuid },
+          query: { size: PAGE_SIZE },
+        })
+        .then(({ data }) => data),
+    () =>
+      sams
+        .getAllSuperCompetitions({ query: { size: PAGE_SIZE, season: seasonUuid } })
+        .then(({ data }) => data),
+  ]);
 
   await sams.getLeagueByUuid({ path: { uuid: leagueUuid } });
 
-  const { data: matchDaysForLeague } = await sams.getMatchDaysForLeague({
-    path: { uuid: leagueUuid },
-    query: { size: PAGE_SIZE },
-  });
-  const matchDayUuid = firstFromPage(matchDaysForLeague, "match-day");
+  const matchDayUuid = await firstUuidFromCalls("match-day", [
+    () =>
+      sams
+        .getMatchDaysForLeague({ path: { uuid: leagueUuid }, query: { size: PAGE_SIZE } })
+        .then(({ data }) => data),
+    () => sams.getAllMatchDays({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
 
   await sams.getRankingsForLeague({ path: { uuid: leagueUuid } });
 
-  const { data: teamsForLeague } = await sams.getTeamsForLeague({
-    path: { uuid: leagueUuid },
-    query: { size: PAGE_SIZE },
-  });
-  const teamUuid = firstFromPage(teamsForLeague, "team");
+  const teamUuid = await firstUuidFromCalls("team", [
+    () =>
+      sams
+        .getTeamsForLeague({ path: { uuid: leagueUuid }, query: { size: PAGE_SIZE } })
+        .then(({ data }) => data),
+    () => sams.getAllTeams({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
 
   await sams.getMatchDayByUuid({ path: { uuid: matchDayUuid } });
 
-  const { data: matchesByMatchDay } = await sams.getMatchesByMatchDay({
-    path: { uuid: matchDayUuid },
-    query: { size: PAGE_SIZE },
-  });
-  const leagueMatchUuid = firstFromPage(matchesByMatchDay, "league match");
+  const leagueMatchUuid = await firstUuidFromCalls("league match", [
+    () =>
+      sams
+        .getMatchesByMatchDay({ path: { uuid: matchDayUuid }, query: { size: PAGE_SIZE } })
+        .then(({ data }) => data),
+    () =>
+      sams
+        .getAllLeagueMatches({ query: { size: PAGE_SIZE, "for-league": leagueUuid } })
+        .then(({ data }) => data),
+  ]);
 
   await sams.getLeagueMatchByUuid({ path: { uuid: leagueMatchUuid } });
 
@@ -102,10 +156,14 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
     query: { size: PAGE_SIZE },
   });
 
-  const { data: competitionMatches } = await sams.getAllCompetitionMatchesWithFilter({
-    query: { size: PAGE_SIZE, "for-competition": competitionUuid },
-  });
-  const competitionMatchUuid = firstFromPage(competitionMatches, "competition match");
+  const competitionMatchUuid = await firstUuidFromCalls("competition match", [
+    () =>
+      sams
+        .getAllCompetitionMatchesWithFilter({
+          query: { size: PAGE_SIZE, "for-competition": competitionUuid },
+        })
+        .then(({ data }) => data),
+  ]);
   await sams.getCompetitionMatchByUuid({ path: { uuid: competitionMatchUuid } });
 
   await sams.getSuperCompetitionByUuid({ path: { uuid: superCompetitionUuid } });
@@ -114,8 +172,9 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
   await sams.getAllLeagueHierarchies({ query: { size: PAGE_SIZE } });
   await sams.getAllMatchDays({ query: { size: PAGE_SIZE } });
 
-  const { data: allMatchGroups } = await sams.getAllMatchGroups({ query: { size: PAGE_SIZE } });
-  const matchGroupUuid = firstFromPage(allMatchGroups, "match group");
+  const matchGroupUuid = await firstUuidFromCalls("match group", [
+    () => sams.getAllMatchGroups({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
 
   await sams.getMatchGroupByUuid({ path: { uuid: matchGroupUuid } });
   await sams.getMatchesByMatchGroup({
@@ -127,12 +186,14 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
   await sams.getAllSuperCompetitions({ query: { size: PAGE_SIZE } });
   await sams.getAllTeams({ query: { size: PAGE_SIZE } });
 
-  const { data: allSportsclubs } = await sams.getAllSportsclubs({ query: { size: PAGE_SIZE } });
-  const sportsclubUuid = firstFromPage(allSportsclubs, "sportsclub");
+  const sportsclubUuid = await firstUuidFromCalls("sportsclub", [
+    () => sams.getAllSportsclubs({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
   await sams.getSportsclub({ path: { uuid: sportsclubUuid } });
 
-  const { data: allAssociations } = await sams.getAssociations({ query: { size: PAGE_SIZE } });
-  const associationUuid = firstFromPage(allAssociations, "association");
+  const associationUuid = await firstUuidFromCalls("association", [
+    () => sams.getAssociations({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
 
   await sams.getAssociationByUuid({ path: { uuid: associationUuid } });
   await sams.getCommitteesForAssociation({
@@ -144,16 +205,19 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
     query: { size: PAGE_SIZE },
   });
 
-  const { data: allCommittees } = await sams.getAllCommittees({ query: { size: PAGE_SIZE } });
-  const committeeUuid = firstFromPage(allCommittees, "committee");
+  const committeeUuid = await firstUuidFromCalls("committee", [
+    () => sams.getAllCommittees({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
   await sams.getCommittee({ path: { uuid: committeeUuid } });
 
-  const { data: allLocations } = await sams.getAllLocations({ query: { size: PAGE_SIZE } });
-  const locationUuid = firstFromPage(allLocations, "location");
+  const locationUuid = await firstUuidFromCalls("location", [
+    () => sams.getAllLocations({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
   await sams.getLocationByUuid({ path: { uuid: locationUuid } });
 
-  const { data: allEvents } = await sams.getAllEvents({ query: { size: PAGE_SIZE } });
-  const eventUuid = firstFromPage(allEvents, "event");
+  const eventUuid = await firstUuidFromCalls("event", [
+    () => sams.getAllEvents({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
+  ]);
   await sams.getEventByUuid({ path: { uuid: eventUuid } });
 
   const { data: eventTypes } = await sams.getEventTypes();
