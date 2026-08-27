@@ -27,8 +27,17 @@ type BoundSdk = {
 
 export type SamsClient = BoundSdk & { client: Client };
 
+/** Strip trailing slashes in O(n); avoids ReDoS from `replace(/\/+$/, "")` on long inputs. */
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+  return end === value.length ? value : value.slice(0, end);
+}
+
 function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.replace(/\/+$/, "");
+  return stripTrailingSlashes(baseUrl);
 }
 
 function mergeAlwaysSamsHeaders(apiKey: string, extra?: HeadersInit): Record<string, string> {
