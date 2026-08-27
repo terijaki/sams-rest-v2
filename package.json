@@ -1,0 +1,81 @@
+{
+  "name": "sams-rest-v2",
+  "version": "0.1.0",
+  "description": "Generated fetch SDK, types, and Zod schemas for the SAMS REST API v2.",
+  "keywords": [
+    "SAMS",
+    "openapi",
+    "sdk",
+    "volleyball"
+  ],
+  "homepage": "https://github.com/terijaki/sams-rest-v2#readme",
+  "bugs": {
+    "url": "https://github.com/terijaki/sams-rest-v2/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Björn Kohnen",
+    "email": "mail@terijaki.eu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/terijaki/sams-rest-v2.git"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "vp pack",
+    "pack": "vp pack",
+    "generate": "bun ./scripts/generate-client.ts",
+    "test": "vp test",
+    "check": "vp check",
+    "check:fix": "vp check --fix",
+    "bugs": "bun ./scripts/check-sams-bugs.ts",
+    "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
+    "prepublishOnly": "vp pack"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/node": "^22.18.0",
+    "@voidzero-dev/vite-plus-core": "0.3.0",
+    "typescript": "^6.0.3",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
+    "vite-plus": "0.3.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.5 || >=6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "packageManager": "bun@1.3.14"
+}

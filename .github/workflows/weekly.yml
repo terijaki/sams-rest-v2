@@ -1,0 +1,259 @@
+name: Weekly SAMS health check
+
+on:
+  schedule:
+    - cron: "0 4 * * 6" # Every Saturday at 4am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  id-token: write
+
+jobs:
+  swagger-drift:
+    name: Check Swagger Drift
+    runs-on: ubuntu-latest
+    outputs:
+      has_drift: ${{ steps.diff.outputs.has_drift }}
+      drift_summary_markdown: ${{ steps.diff.outputs.drift_summary_markdown }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Snapshot committed source.json
+        run: git show HEAD:src/generated/source.json > /tmp/committed-source.json
+
+      - name: Regenerate from live spec (no API key)
+        run: vp run generate
+        env:
+          SAMS_API_KEY: ""
+
+      - name: Detect semantic drift in source.json
+        id: diff
+        run: |
+          bun scripts/check-sams-swagger-drift.ts \
+            /tmp/committed-source.json \
+            src/generated/source.json
+
+      - name: Upload regenerated client
+        if: steps.diff.outputs.has_drift == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-client
+          path: src/generated
+          include-hidden-files: true
+
+  pr-drift:
+    name: Open PR for swagger drift
+    needs: [swagger-drift, regenerate]
+    if: |
+      always() &&
+      needs.swagger-drift.outputs.has_drift == 'true' &&
+      needs.regenerate.outputs.failed == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      pr_url: ${{ steps.pr.outputs.pr_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Restore regenerated client
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-client
+          path: src/generated
+
+      - name: Open or update drift PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="sams-swagger-drift"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B "$BRANCH" origin/main
+          git add src/generated
+          if git diff --cached --quiet; then
+            echo "No generated-file changes after artifact restore."
+            exit 0
+          fi
+          git commit -m "fix: regenerate SAMS client from upstream swagger"
+          git push -u origin "$BRANCH" --force-with-lease
+
+          PR_URL=$(gh pr list --head "$BRANCH" --base main --state open --json url -q '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            PR_URL=$(gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "fix: regenerate SAMS client from upstream swagger" \
+              --body "Automated weekly update from upstream OpenAPI drift. Review, approve, and merge to release.")
+          fi
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+  bug-check:
+    name: Check Known API Bugs
+    runs-on: ubuntu-latest
+    outputs:
+      has_fixed: ${{ steps.parse.outputs.has_fixed }}
+      fixed_bug_ids: ${{ steps.parse.outputs.fixed_bug_ids }}
+      check_failed_ids: ${{ steps.parse.outputs.check_failed_ids }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Run bug checks
+        env:
+          SAMS_API_KEY: ${{ secrets.SAMS_API_KEY }}
+        run: bun scripts/check-sams-bugs.ts > bug-results.json
+
+      - name: Parse results and set outputs
+        id: parse
+        run: |
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('bug-results.json', 'utf8'));
+
+            const fixedIds = data.bugs.filter(b => b.status === 'fixed').map(b => String(b.id));
+            const failedIds = data.bugs.filter(b => b.status === 'check_failed').map(b => String(b.id));
+
+            const lines = [
+              'has_fixed=' + (fixedIds.length > 0 ? 'true' : 'false'),
+              'fixed_bug_ids=' + fixedIds.join(','),
+              'check_failed_ids=' + failedIds.join(','),
+            ];
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, lines.join('\\n') + '\\n');
+          "
+
+      - name: Write step summary
+        run: |
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('bug-results.json', 'utf8'));
+            const icon = { fixed: '✅', still_present: '⚠️', check_failed: '❌' };
+            const label = { fixed: 'Fixed', still_present: 'Still present', check_failed: 'Check failed' };
+            const rows = data.bugs.map(b =>
+              '| ' + [b.id, b.summary, icon[b.status] + ' ' + label[b.status]].join(' | ') + ' |'
+            );
+            const lines = [
+              '## Bug check results',
+              '',
+              '| # | Bug | Status |',
+              '|---|---|---|',
+              ...rows,
+              '',
+              '_Checked at: ' + data.checkedAt + '_',
+            ];
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\\n') + '\\n');
+          "
+
+  regenerate:
+    name: Regenerate & Verify
+    runs-on: ubuntu-latest
+    outputs:
+      failed: ${{ steps.result.outputs.failed }}
+      failure_step: ${{ steps.result.outputs.failure_step }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Regenerate client from live spec (no API key)
+        id: regen
+        run: vp run generate
+        env:
+          SAMS_API_KEY: ""
+
+      - name: Check
+        id: check
+        continue-on-error: true
+        run: vp check
+
+      - name: Test
+        id: test
+        continue-on-error: true
+        run: vp test
+
+      - name: Pack
+        id: pack
+        continue-on-error: true
+        run: vp pack
+
+      - name: Set result outputs
+        id: result
+        run: |
+          if [ "${{ steps.regen.outcome }}" = "failure" ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            echo "failure_step=regeneration" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.check.outcome }}" = "failure" ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            echo "failure_step=check" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.test.outcome }}" = "failure" ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            echo "failure_step=tests" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.pack.outcome }}" = "failure" ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            echo "failure_step=pack" >> "$GITHUB_OUTPUT"
+          else
+            echo "failed=false" >> "$GITHUB_OUTPUT"
+            echo "failure_step=" >> "$GITHUB_OUTPUT"
+          fi
+
+  notify:
+    name: Create Issue if Actionable
+    needs: [swagger-drift, bug-check, regenerate, pr-drift]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Create GitHub issue
+        if: |
+          needs.swagger-drift.outputs.has_drift == 'true' ||
+          needs.bug-check.outputs.has_fixed == 'true' ||
+          needs.regenerate.outputs.failed == 'true' ||
+          needs.swagger-drift.result == 'failure' ||
+          needs.bug-check.result == 'failure' ||
+          needs.regenerate.result == 'failure' ||
+          needs.pr-drift.result == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_DRIFT: ${{ needs.swagger-drift.outputs.has_drift }}
+          DRIFT_SUMMARY_MARKDOWN: ${{ needs.swagger-drift.outputs.drift_summary_markdown }}
+          HAS_FIXED: ${{ needs.bug-check.outputs.has_fixed }}
+          FIXED_BUG_IDS: ${{ needs.bug-check.outputs.fixed_bug_ids }}
+          CHECK_FAILED_IDS: ${{ needs.bug-check.outputs.check_failed_ids }}
+          REGEN_FAILED: ${{ needs.regenerate.outputs.failed }}
+          FAILURE_STEP: ${{ needs.regenerate.outputs.failure_step }}
+          SWAGGER_DRIFT_RESULT: ${{ needs.swagger-drift.result }}
+          BUG_CHECK_RESULT: ${{ needs.bug-check.result }}
+          REGENERATE_RESULT: ${{ needs.regenerate.result }}
+          PR_DRIFT_RESULT: ${{ needs.pr-drift.result }}
+          DRIFT_PR_URL: ${{ needs.pr-drift.outputs.pr_url }}
+        run: bun scripts/sams-notify.ts
