@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vite-plus/test";
 import { createSamsClient } from "../create-sams-client";
 import { SAMS_DEFAULT_BASE_URL } from "../constants";
+import { assertTeamRosterHasMembers } from "../test-support/assert-team-roster";
 import { LIVE_FIXTURES } from "../test-support/live-fixtures";
 
 function requireSamsApiKey(): string {
@@ -39,5 +40,14 @@ describe("live SAMS smoke", () => {
     expect(teamResult.response?.status).not.toBe(403);
     expect(teamResult.error).toBeUndefined();
     expect(teamResult.data?.uuid).toBe(LIVE_FIXTURES.teamUuid);
+
+    const rosterResult = await sams.getTeamRosterByTeamUuid({
+      path: { uuid: LIVE_FIXTURES.teamUuid },
+    });
+    expect(rosterResult.response?.status).not.toBe(403);
+    expect(rosterResult.error).toBeUndefined();
+    expect(rosterResult.data).toBeDefined();
+    assertTeamRosterHasMembers(rosterResult.data!);
+    expect(rosterResult.data?.players?.length ?? 0).toBeGreaterThan(0);
   }, 30_000);
 });

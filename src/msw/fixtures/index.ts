@@ -200,8 +200,34 @@ export const fixtures = {
   roster: {
     uuid: ids.team,
     teamUuid: ids.team,
-    players: [{ uuid: "player-1", name: "Max Mustermann", jerseyNumber: 7 }],
-    officials: [{ uuid: "official-1", name: "Coach Test", role: "headCoach" }],
+    players: [
+      {
+        uuid: "player-1",
+        name: "Max Mustermann",
+        jerseyNumber: 7,
+        position: null,
+        portraitImageLink: null,
+        firstName: null,
+        lastName: null,
+        birthdate: null,
+        nationality: null,
+        height: null,
+        userId: null,
+      },
+    ],
+    officials: [
+      {
+        uuid: "official-1",
+        name: "Coach Test",
+        role: "headCoach",
+        firstName: null,
+        lastName: null,
+        birthdate: null,
+        nationality: null,
+        portraitImageLink: null,
+        userId: null,
+      },
+    ],
   },
   sportsclub: {
     uuid: ids.sportsclub,

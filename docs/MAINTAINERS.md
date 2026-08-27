@@ -60,12 +60,14 @@ vp run smoke   # public + protected endpoint; fails on HTTP 403
 
 Fixture UUIDs for live checks: `src/test-support/live-fixtures.ts` (also referenced in [BUGS.md](BUGS.md)).
 
+Consumer endpoint manifest (`src/test-support/consumer-endpoints.ts`): SDK operations used by **vcmuellheim** and **markgraefler-volleys**. The unit test `consumer-endpoints.test.ts` asserts `walkSamsApiGraph` calls each one. Team roster (`getTeamRosterByTeamUuid`) is validated for `players` / `officials` shape in MSW, the live graph, smoke, and `sams-roster.live.test.ts`.
+
 ### Tests vs scripts
 
-| Kind                                                               | Examples                                   | Role                                                                          |
-| ------------------------------------------------------------------ | ------------------------------------------ | ----------------------------------------------------------------------------- |
-| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)          | unit, MSW contract, live graph, live smoke | Pass/fail gates — fail CI on regression                                       |
-| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`) | JSON reports, codegen, workflow glue       | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only |
+| Kind                                                               | Examples                                                | Role                                                                          |
+| ------------------------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)          | unit, MSW contract, live graph, live smoke, live roster | Pass/fail gates — fail CI on regression                                       |
+| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`) | JSON reports, codegen, workflow glue                    | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only |
 
 Upstream defect registry: `src/upstream/bugs.ts` (slug + numeric id). Live probe implementations: `src/upstream/bug-probes.ts`. Human-readable catalogue: [BUGS.md](BUGS.md). Prefer **slug** in code comments; numeric **#** remains in weekly reports for history.
 

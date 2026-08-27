@@ -1,4 +1,5 @@
 import type { SamsClient } from "../create-sams-client";
+import { assertTeamRosterStructure } from "./assert-team-roster";
 
 const PAGE_SIZE = 5;
 const DISCOVERY_PAGE_SIZE = 100;
@@ -147,7 +148,10 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
   });
 
   await sams.getTeamByUuid({ path: { uuid: teamUuid } });
-  await sams.getTeamRosterByTeamUuid({ path: { uuid: teamUuid } });
+  const { data: roster } = await sams.getTeamRosterByTeamUuid({ path: { uuid: teamUuid } });
+  if (roster) {
+    assertTeamRosterStructure(roster);
+  }
 
   await sams.getCompetitionByUuid({ path: { uuid: competitionUuid } });
   await sams.getMatchGroupsForCompetition({
