@@ -52,7 +52,7 @@ Valid key: length **36**, prefix **`3fe`**. Length 49 or prefix `htt` means stal
 | `src/upstream/bugs.ts`              | Upstream defect registry (slug + id)                    |
 | `src/upstream/bug-probes.ts`        | Live upstream bug probes                                |
 | `src/test-support/live-fixtures.ts` | Stable UUIDs for live probes/smoke                      |
-| `bunfig.toml`                       | Bun/Vite+ install policy (`minimumReleaseAge`)        |
+| `bunfig.toml`                       | Bun/Vite+ install policy (`minimumReleaseAge`)          |
 | `scripts/check-sams-bugs.ts`        | CLI wrapper for `vp run bugs`                           |
 | `docs/BUGS.md`                      | Documented upstream API defects                         |
 | `.cursor/environment.json`          | Cloud Agent bootstrap (`vp install`)                    |
