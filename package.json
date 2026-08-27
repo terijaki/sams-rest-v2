@@ -1,6 +1,6 @@
 {
   "name": "sams-rest-v2",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Generated fetch SDK, types, and Zod schemas for the SAMS REST API v2.",
   "keywords": [
     "SAMS",
@@ -46,10 +46,13 @@
     "pack": "vp pack",
     "generate": "bun ./scripts/generate-client.ts",
     "test": "vp test",
+    "typecheck": "vp check",
     "check": "vp check",
     "check:fix": "vp check --fix",
     "bugs": "bun ./scripts/check-sams-bugs.ts",
+    "smoke": "bun ./scripts/smoke-test-client.ts",
     "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
+    "notify": "bun ./scripts/sams-notify.ts",
     "prepublishOnly": "vp pack"
   },
   "dependencies": {

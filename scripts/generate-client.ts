@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 /**
  * Generate the SAMS REST v2 fetch SDK, types, and Zod schemas.
  *
