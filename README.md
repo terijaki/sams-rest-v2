@@ -1,10 +1,10 @@
-# SAMS REST v2 client (`sams-rest-v2`)
+# sams-rest-v2
 
-TypeScript client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle) — generated fetch SDK, types, and Zod schemas.
-
-**Requirements:** Node.js **22.18+**. TypeScript **6.x** for type-checking (7.x is not yet supported by the codegen toolchain).
+TypeScript client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle) — the backend behind regional volleyball sites such as [volleyball-baden.de](https://www.volleyball-baden.de). Install the package, configure your API key once, and call typed methods for seasons, teams, leagues, matches, and standings instead of hand-rolling HTTP requests.
 
 ## Install
+
+Requires Node.js **22.18+**.
 
 ```bash
 npm install sams-rest-v2
