@@ -5,17 +5,40 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: publish-main
   cancel-in-progress: false
 
 jobs:
+  verify:
+    name: Check, test & pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Check
+        run: vp check
+
+      - name: Test
+        run: vp test
+
+      - name: Pack
+        run: vp pack
+
   publish:
     name: Publish to npm
+    needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v5
 
@@ -28,9 +51,6 @@ jobs:
         with:
           node-version: "25"
           registry-url: https://registry.npmjs.org
-
-      - name: Verify
-        run: vp check && vp test && vp pack
 
       - name: Publish
         run: npm publish --access public --provenance

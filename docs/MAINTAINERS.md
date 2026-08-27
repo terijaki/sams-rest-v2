@@ -72,9 +72,9 @@ These are **separate** — configuring one does not configure the other.
 
 | Workflow           | Trigger                | Purpose                                                   |
 | ------------------ | ---------------------- | --------------------------------------------------------- |
-| `ci.yml`           | PR / push to `main`    | `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod` |
+| `ci.yml`           | PR                     | `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod` |
 | `version-bump.yml` | PR opened/updated      | Patch-bump `package.json` on PR branch                    |
-| `publish.yml`      | Merge to `main`        | Verify, `npm publish` (OIDC), git tag/release             |
+| `publish.yml`      | Merge to `main`        | Chained verify → `npm publish` (OIDC), git tag/release    |
 | `weekly.yml`       | Saturday cron / manual | Swagger drift, live bugs, drift PR                        |
 
 ### Weekly health check
@@ -138,7 +138,8 @@ Security PRs bypass the monthly/quarterly schedule and cooldown.
 `main` is protected — changes land via reviewed PRs only.
 
 1. **Version bump** — automatic on PR branch via `version-bump.yml`
-2. **Publish** — on merge, `publish.yml` runs verify → `npm publish --access public --provenance` → `v*` release
+2. **CI on PR** — `ci.yml` gates merge via branch protection
+3. **Publish on merge** — `publish.yml` runs chained verify job then publish (not parallel with `ci.yml`)
 
 Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC from GitHub Actions). **Do not** replace `npm publish` with `bun publish` — bun does not support OIDC trusted publishing yet.
 
