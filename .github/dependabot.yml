@@ -9,10 +9,9 @@ updates:
       timezone: UTC
     open-pull-requests-limit: 3
     cooldown:
-      default-days: 3
+      default-days: 14
       semver-major-days: 60
       semver-minor-days: 30
-      semver-patch-days: 3
     groups:
       security-all:
         applies-to: security-updates
