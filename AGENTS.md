@@ -47,7 +47,7 @@ Valid key: length **36**, prefix **`3fe`**. Length 49 or prefix `htt` means stal
 | `src/codegen/schema-patches.ts` | OpenAPI schema fixes before codegen                     |
 | `src/generated/`                | Generated SDK — regenerate, don't hand-edit             |
 | `scripts/generate-client.ts`    | Codegen (no API key)                                    |
-| `scripts/check-sams-bugs.ts`    | Live bug probes (#2–#8)                                 |
+| `scripts/check-sams-bugs.ts`    | Live bug probes (#2–#10)                                |
 | `scripts/smoke-test-client.ts`  | Live smoke (public + protected endpoints)               |
 | `docs/BUGS.md`                  | Documented upstream API defects                         |
 | `.cursor/environment.json`      | Cloud Agent bootstrap (`vp install`)                    |

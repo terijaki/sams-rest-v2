@@ -43,9 +43,11 @@ const bugDescriptions: Record<number, string> = {
   6: "`date` field declared as `date-time` but API returns a date-only string (`YYYY-MM-DD`)",
   7: "`referees`/`results` use `$ref + nullable: true` and break code generators",
   8: "`LeagueHierarchyDto.parentLeagueHierarchyUuid` declared non-null but API returns `null`",
+  9: "Competition/League/SuperCompetition unset fields return `null` but spec omits `nullable: true`",
+  10: "`SuperCompetitionDto._embedded.sub_competitions` is an array but spec models embedded values as objects",
 };
 
-const allBugIds = [2, 3, 4, 5, 6, 7, 8];
+const allBugIds = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const fixedSet = new Set(fixedBugIds);
 const failedSet = new Set(checkFailedIds);
 const rows = allBugIds.map((id) => {

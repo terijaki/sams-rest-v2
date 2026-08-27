@@ -19,6 +19,12 @@ const VERBANDSLIGA_HERREN_UUID = "2000b48f-eec8-4927-beb1-c4568069ebec";
 // VC Müllheim 1 (Herren) — used for team-level bug checks
 const VC_MULLHEIM_TEAM_UUID = "c2ddea7c-b7ec-4172-aa85-4d9c47aba362";
 
+const NULLABLE_COMPETITION_FIELDS = [
+  "superCompetitionUuid",
+  "latestResultUpdate",
+  "latestStructuralUpdate",
+] as const;
+
 type BugStatus = "still_present" | "fixed" | "check_failed";
 
 interface BugResult {
@@ -46,6 +52,35 @@ async function samsGet(
       ...overrideHeaders,
     },
   });
+}
+
+async function fetchSwaggerSpec(): Promise<Record<string, unknown> | null> {
+  const specRes = await fetch(`${BASE_URL}/swagger.json`, { headers: { Accept: "*/*" } });
+  if (!specRes.ok) return null;
+  return (await specRes.json()) as Record<string, unknown>;
+}
+
+async function getCurrentSeasonUuid(apiKey: string): Promise<string | null> {
+  const seasonRes = await samsGet("/seasons", apiKey);
+  if (!seasonRes.ok) return null;
+  const seasons = (await seasonRes.json()) as Array<{ uuid?: string; currentSeason?: boolean }>;
+  return seasons.find((season) => season.currentSeason)?.uuid ?? null;
+}
+
+function specFieldAllowsNull(field: unknown): boolean {
+  if (typeof field !== "object" || field === null) return false;
+  const value = field as { nullable?: boolean; oneOf?: unknown; anyOf?: unknown };
+  return value.nullable === true || Array.isArray(value.oneOf) || Array.isArray(value.anyOf);
+}
+
+function schemaProperties(
+  spec: Record<string, unknown>,
+  schemaName: string,
+): Record<string, unknown> | undefined {
+  const components = spec.components as
+    | { schemas?: Record<string, { properties?: Record<string, unknown> }> }
+    | undefined;
+  return components?.schemas?.[schemaName]?.properties;
 }
 
 // Bug #2 — logoImageForScreenOutputLink always null on GET /teams/{uuid}
@@ -232,51 +267,15 @@ async function checkBug8(apiKey: string): Promise<BugResult> {
   const summary =
     "LeagueHierarchyDto.parentLeagueHierarchyUuid declared non-null but API returns null for root nodes";
   try {
-    const specRes = await fetch(`${BASE_URL}/swagger.json`, { headers: { Accept: "*/*" } });
-    if (!specRes.ok) {
-      return {
-        id,
-        summary,
-        status: "check_failed",
-        detail: `HTTP ${specRes.status} fetching swagger.json`,
-      };
+    const spec = await fetchSwaggerSpec();
+    if (!spec) {
+      return { id, summary, status: "check_failed", detail: "Failed to fetch swagger.json" };
     }
 
-    const spec = (await specRes.json()) as {
-      components?: {
-        schemas?: {
-          LeagueHierarchyDto?: {
-            properties?: {
-              parentLeagueHierarchyUuid?: {
-                type?: string;
-                nullable?: boolean;
-                oneOf?: unknown;
-                anyOf?: unknown;
-              };
-            };
-          };
-        };
-      };
-    };
+    const parentField = schemaProperties(spec, "LeagueHierarchyDto")?.parentLeagueHierarchyUuid;
+    const specDeclaresNullable = specFieldAllowsNull(parentField);
 
-    const parentField =
-      spec.components?.schemas?.LeagueHierarchyDto?.properties?.parentLeagueHierarchyUuid;
-    const specDeclaresNullable =
-      parentField?.nullable === true ||
-      Array.isArray(parentField?.oneOf) ||
-      Array.isArray(parentField?.anyOf);
-
-    const seasonRes = await samsGet("/seasons", apiKey);
-    if (!seasonRes.ok) {
-      return {
-        id,
-        summary,
-        status: "check_failed",
-        detail: `HTTP ${seasonRes.status} fetching seasons`,
-      };
-    }
-    const seasons = (await seasonRes.json()) as Array<{ uuid?: string; currentSeason?: boolean }>;
-    const currentSeasonUuid = seasons.find((season) => season.currentSeason)?.uuid;
+    const currentSeasonUuid = await getCurrentSeasonUuid(apiKey);
     if (!currentSeasonUuid) {
       return { id, summary, status: "check_failed", detail: "Current season not found" };
     }
@@ -318,6 +317,159 @@ async function checkBug8(apiKey: string): Promise<BugResult> {
   }
 }
 
+// Bug #9 — Competition/League/SuperCompetition fields return null when unset (discovered 2026-08-27)
+async function checkBug9(apiKey: string): Promise<BugResult> {
+  const id = 9;
+  const summary =
+    "Competition/League/SuperCompetition unset fields return null but spec omits nullable: true";
+  try {
+    const spec = await fetchSwaggerSpec();
+    if (!spec) {
+      return { id, summary, status: "check_failed", detail: "Failed to fetch swagger.json" };
+    }
+
+    const specOmitsNullable = ["CompetitionDto", "LeagueDto", "SuperCompetitionDto"].some(
+      (schemaName) => {
+        const properties = schemaProperties(spec, schemaName);
+        if (!properties) return false;
+        return NULLABLE_COMPETITION_FIELDS.some(
+          (field) => properties[field] !== undefined && !specFieldAllowsNull(properties[field]),
+        );
+      },
+    );
+
+    const currentSeasonUuid = await getCurrentSeasonUuid(apiKey);
+    if (!currentSeasonUuid) {
+      return { id, summary, status: "check_failed", detail: "Current season not found" };
+    }
+
+    const [competitionsRes, leagueRes, superCompetitionsRes] = await Promise.all([
+      samsGet(`/competitions?size=50&season=${currentSeasonUuid}`, apiKey),
+      samsGet(`/leagues/${VERBANDSLIGA_HERREN_UUID}`, apiKey),
+      samsGet(`/super-competitions?size=50&season=${currentSeasonUuid}`, apiKey),
+    ]);
+
+    if (!competitionsRes.ok) {
+      return {
+        id,
+        summary,
+        status: "check_failed",
+        detail: `HTTP ${competitionsRes.status} fetching competitions`,
+      };
+    }
+    if (!leagueRes.ok) {
+      return {
+        id,
+        summary,
+        status: "check_failed",
+        detail: `HTTP ${leagueRes.status} fetching league`,
+      };
+    }
+    if (!superCompetitionsRes.ok) {
+      return {
+        id,
+        summary,
+        status: "check_failed",
+        detail: `HTTP ${superCompetitionsRes.status} fetching super-competitions`,
+      };
+    }
+
+    const competitionsData = (await competitionsRes.json()) as {
+      content?: Array<Record<string, unknown>>;
+    };
+    const leagueData = (await leagueRes.json()) as Record<string, unknown>;
+    const superCompetitionsData = (await superCompetitionsRes.json()) as {
+      content?: Array<Record<string, unknown>>;
+    };
+
+    const payloads = [
+      ...(competitionsData.content ?? []),
+      leagueData,
+      ...(superCompetitionsData.content ?? []),
+    ];
+    const apiReturnsNull = payloads.some((entry) =>
+      NULLABLE_COMPETITION_FIELDS.some((field) => entry[field] === null),
+    );
+
+    const bugPresent = specOmitsNullable && apiReturnsNull;
+    const detail = [
+      specOmitsNullable ? "spec still omits nullable on timestamp/uuid fields" : null,
+      apiReturnsNull ? "API returns null for unset fields" : null,
+    ]
+      .filter(Boolean)
+      .join("; ");
+    return {
+      id,
+      summary,
+      status: bugPresent ? "still_present" : "fixed",
+      detail: detail || undefined,
+    };
+  } catch (e) {
+    return { id, summary, status: "check_failed", detail: String(e) };
+  }
+}
+
+// Bug #10 — _embedded.sub_competitions is an array but spec models embedded values as objects (discovered 2026-08-27)
+async function checkBug10(apiKey: string): Promise<BugResult> {
+  const id = 10;
+  const summary =
+    "SuperCompetitionDto._embedded.sub_competitions is an array but spec models embedded values as objects";
+  try {
+    const spec = await fetchSwaggerSpec();
+    if (!spec) {
+      return { id, summary, status: "check_failed", detail: "Failed to fetch swagger.json" };
+    }
+
+    const embeddedSpec = schemaProperties(spec, "SuperCompetitionDto")?._embedded as
+      | { additionalProperties?: { type?: string } }
+      | undefined;
+    const specExpectsObjectValues = embeddedSpec?.additionalProperties?.type === "object";
+
+    const currentSeasonUuid = await getCurrentSeasonUuid(apiKey);
+    if (!currentSeasonUuid) {
+      return { id, summary, status: "check_failed", detail: "Current season not found" };
+    }
+
+    const superCompetitionsRes = await samsGet(
+      `/super-competitions?size=50&season=${currentSeasonUuid}`,
+      apiKey,
+    );
+    if (!superCompetitionsRes.ok) {
+      return {
+        id,
+        summary,
+        status: "check_failed",
+        detail: `HTTP ${superCompetitionsRes.status} fetching super-competitions`,
+      };
+    }
+
+    const superCompetitionsData = (await superCompetitionsRes.json()) as {
+      content?: Array<{ _embedded?: Record<string, unknown> }>;
+    };
+    const apiReturnsArray = superCompetitionsData.content?.some((entry) => {
+      const embedded = entry._embedded;
+      if (!embedded || typeof embedded !== "object") return false;
+      return Object.values(embedded).some((value) => Array.isArray(value));
+    });
+
+    const bugPresent = specExpectsObjectValues && Boolean(apiReturnsArray);
+    const detail = [
+      specExpectsObjectValues ? "spec still models _embedded values as objects" : null,
+      apiReturnsArray ? "API returns array under _embedded" : null,
+    ]
+      .filter(Boolean)
+      .join("; ");
+    return {
+      id,
+      summary,
+      status: bugPresent ? "still_present" : "fixed",
+      detail: detail || undefined,
+    };
+  } catch (e) {
+    return { id, summary, status: "check_failed", detail: String(e) };
+  }
+}
+
 async function main(): Promise<void> {
   const apiKey = process.env.SAMS_API_KEY;
   if (!apiKey) {
@@ -325,7 +477,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const [bug2, bug3, bug4, bug5, bug6, bug7, bug8] = await Promise.all([
+  const [bug2, bug3, bug4, bug5, bug6, bug7, bug8, bug9, bug10] = await Promise.all([
     checkBug2(apiKey),
     checkBug3(apiKey),
     checkBug4(),
@@ -333,10 +485,12 @@ async function main(): Promise<void> {
     checkBug6(apiKey),
     checkBug7(apiKey),
     checkBug8(apiKey),
+    checkBug9(apiKey),
+    checkBug10(apiKey),
   ]);
 
   const result: CheckResult = {
-    bugs: [bug2, bug3, bug4, bug5, bug6, bug7, bug8],
+    bugs: [bug2, bug3, bug4, bug5, bug6, bug7, bug8, bug9, bug10],
     checkedAt: new Date().toISOString(),
   };
 

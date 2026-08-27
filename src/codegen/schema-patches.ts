@@ -3,6 +3,13 @@
  *
  * Lifted from vcmuellheim `codegen/sams/generate-client.ts` (`parser.patch.schemas`).
  * These compensate for upstream SAMS spec/API mismatches; see docs/BUGS.md.
+ *
+ * When adding a patch for a newly discovered gap, include an inline comment with:
+ *   - Bug # from docs/BUGS.md (add an entry there too)
+ *   - `discovered YYYY-MM-DD` (date the live API / CI probe first surfaced it)
+ *   - One line on spec vs actual behaviour
+ *
+ * Live probes: scripts/check-sams-bugs.ts (weekly CI + `vp run bugs`).
  */
 
 export type SchemaObject = {
@@ -85,16 +92,17 @@ function patchMatchDto(schema: SchemaObject): void {
  * Keep keys identical to upstream component schema names.
  */
 export const schemaPatches: Record<string, SchemaPatch> = {
-  // _embedded (team1/team2) is not in the upstream spec — injected here based on actual API responses.
-  // results: null when no match has been played; referees: null when none assigned;
-  // team1Mvp/team2Mvp: null when no MVP is assigned (typical for unplayed matches).
-  //   NOTE: hey-api no longer respects nullable:true on $ref fields — must use explicit allOf+nullable instead.
-  // date.format corrected to "date" (upstream uses "date-time" which generates wrong Zod type).
+  // Match DTOs — discovered 2026-02-22 (docs/BUGS.md initial audit).
+  // Bug #6: `date` is format date-time in spec but API returns YYYY-MM-DD (time is a separate field).
+  // Bug #7: `referees`/`results`/`location`/MVPs use bare `$ref + nullable` (invalid OAS 3.0); API returns null.
+  // `_embedded.team1/team2` are absent from upstream spec but present in live HAL responses.
+  // NOTE: hey-api drops nullable on bare $ref — wrap in `{ allOf: [property], nullable: true }`.
   CompetitionMatchDto: patchMatchDto,
   LeagueMatchDto: patchMatchDto,
   RefereeTeamDto: markAllPropertiesNullable,
   Location: markAllPropertiesNullable,
   VolleyballMatchResultsDto: markAllPropertiesNullable,
+  // Bug #3 (discovered 2026-02-22): pre-season `ballRatio`/`setRatio` can be the string "Infinity".
   LeagueRankingsEntryDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -132,7 +140,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
-  // SAMS returns null (not omitted) for unset optional player/official fields.
+  // SAMS returns null (not omitted) for unset optional fields — discovered 2026-02-22 (roster probes).
   TeamPlayerDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -195,6 +203,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
+  // Bug #8 (discovered 2026-02-22): root nodes return `parentLeagueHierarchyUuid: null` but spec is non-null string.
   LeagueHierarchyDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -205,7 +214,6 @@ export const schemaPatches: Record<string, SchemaPatch> = {
           value.nullable = false;
           break;
         case "parentLeagueHierarchyUuid":
-          // Upstream may return null for root hierarchy nodes.
           value.nullable = true;
           break;
         default:
@@ -213,6 +221,12 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
+  // Bug #9 (discovered 2026-08-27, PR #11 live CI `getAllCompetitions`): unset
+  // `superCompetitionUuid` / `latestResultUpdate` / `latestStructuralUpdate` are null in responses
+  // but upstream spec omits `nullable: true` → generated Zod rejects valid payloads.
+  // Bug #10 (discovered 2026-08-27, PR #11 live CI `getAllSuperCompetitions`): `_embedded.sub_competitions`
+  // is a JSON array; spec models `_embedded` values as objects (`additionalProperties: { type: object }`)
+  // → generated Zod expects a record, not an array. Relax `_embedded` to accept any HAL shape.
   CompetitionDto: (schema) => {
     if (!schema.properties) return;
     schema.properties._embedded = {
@@ -230,7 +244,6 @@ export const schemaPatches: Record<string, SchemaPatch> = {
         case "superCompetitionUuid":
         case "latestResultUpdate":
         case "latestStructuralUpdate":
-          // Live API returns null when unset.
           value.nullable = true;
           break;
         default:
@@ -238,6 +251,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
+  // Bug #9 + #10 — same CompetitionDto issues on super-competition list/detail (discovered 2026-08-27).
   SuperCompetitionDto: (schema) => {
     if (!schema.properties) return;
     schema.properties._embedded = {
@@ -262,6 +276,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
+  // Bug #9 (discovered 2026-08-27): `latestResultUpdate` / `latestStructuralUpdate` null when unset.
   LeagueDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
