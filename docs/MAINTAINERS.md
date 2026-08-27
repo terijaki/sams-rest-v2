@@ -105,6 +105,8 @@ Jobs: `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Heal
 
 Configured in [`.github/dependabot.yml`](../.github/dependabot.yml). Version updates are low-frequency; security updates are immediate.
 
+Version-update PRs wait at least **14 days** after a release (`cooldown.default-days`; majors/minors use 60 / 30 days). Local installs use a shorter floor via [`bunfig.toml`](../bunfig.toml) (`minimumReleaseAge = 259200`, 3 days); `vp install` delegates to Bun and honors that file.
+
 ### Schedule
 
 | Ecosystem        | Version updates             | Security updates    |
