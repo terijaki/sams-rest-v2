@@ -1,6 +1,6 @@
 {
   "name": "sams-rest-v2",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Generated fetch SDK, types, and Zod schemas for the SAMS REST API v2.",
   "keywords": [
     "SAMS",
