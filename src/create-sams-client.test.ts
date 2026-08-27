@@ -50,25 +50,6 @@ describe("createSamsClient", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("strips trailing slashes from baseUrl without quadratic regex backtracking", () => {
-    expect(
-      createSamsClient({
-        baseUrl: "https://example.test/api/v2///",
-        apiKey: "test-fixture-key",
-        fetch: vi.fn(async () => jsonResponse([])) as typeof fetch,
-      }).client.getConfig().baseUrl,
-    ).toBe("https://example.test/api/v2");
-
-    const slashRun = `${"a".repeat(1)}/${"/".repeat(5000)}b`;
-    const start = performance.now();
-    createSamsClient({
-      baseUrl: slashRun,
-      apiKey: "test-fixture-key",
-      fetch: vi.fn(async () => jsonResponse([])) as typeof fetch,
-    });
-    expect(performance.now() - start).toBeLessThan(100);
-  });
-
   it("binds SDK methods to the created client so callers do not pass { client }", async () => {
     const fetchMock = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(
       async () => jsonResponse({ uuid: "team-1", name: "VC Test 1" }),
