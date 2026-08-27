@@ -1,8 +1,14 @@
 /**
  * OpenAPI schema patches applied before @hey-api/openapi-ts generates the client.
  *
- * Lifted from vcmuellheim `codegen/sams/generate-client.ts` (`parser.patch.schemas`).
  * These compensate for upstream SAMS spec/API mismatches; see docs/BUGS.md.
+ *
+ * When adding a patch for a newly discovered gap, include an inline comment with:
+ *   - `slug` from src/upstream/bugs.ts (add an entry in docs/BUGS.md too)
+ *   - `discovered YYYY-MM-DD`
+ *   - One line on spec vs actual behaviour
+ *
+ * Live probes: src/upstream/bug-probes.ts (`vp run bugs`).
  */
 
 export type SchemaObject = {
@@ -80,21 +86,46 @@ function patchMatchDto(schema: SchemaObject): void {
   }
 }
 
+function patchMatchDayDto(schema: SchemaObject): void {
+  if (!schema.properties) return;
+  const matchdate = asSchemaProperty(schema.properties.matchdate);
+  if (matchdate) {
+    // upstream: matchday-date-format (discovered 2026-08-27) — same date-only quirk as match-date-format.
+    matchdate.format = "date";
+    matchdate.nullable = true;
+  }
+  for (const [key, property] of Object.entries(schema.properties)) {
+    if (key === "matchdate") continue;
+    const value = asSchemaProperty(property);
+    if (!value) continue;
+    switch (key) {
+      case "uuid":
+        value.nullable = false;
+        break;
+      default:
+        value.nullable = true;
+    }
+  }
+}
+
 /**
  * Named schema patches consumed by @hey-api/openapi-ts `parser.patch.schemas`.
  * Keep keys identical to upstream component schema names.
  */
 export const schemaPatches: Record<string, SchemaPatch> = {
-  // _embedded (team1/team2) is not in the upstream spec — injected here based on actual API responses.
-  // results: null when no match has been played; referees: null when none assigned;
-  // team1Mvp/team2Mvp: null when no MVP is assigned (typical for unplayed matches).
-  //   NOTE: hey-api no longer respects nullable:true on $ref fields — must use explicit allOf+nullable instead.
-  // date.format corrected to "date" (upstream uses "date-time" which generates wrong Zod type).
+  // Match DTOs — discovered 2026-02-22.
+  // upstream: match-date-format — `date` is format date-time in spec but API returns YYYY-MM-DD.
+  // upstream: match-ref-results-nullable-ref — bare `$ref + nullable` (invalid OAS 3.0); API returns null.
+  // `_embedded.team1/team2` are absent from upstream spec but present in live HAL responses.
+  // NOTE: hey-api drops nullable on bare $ref — wrap in `{ allOf: [property], nullable: true }`.
   CompetitionMatchDto: patchMatchDto,
   LeagueMatchDto: patchMatchDto,
+  // upstream: matchday-date-format (discovered 2026-08-27, live CI getMatchDaysForLeague).
+  LeagueMatchDayDto: patchMatchDayDto,
   RefereeTeamDto: markAllPropertiesNullable,
   Location: markAllPropertiesNullable,
   VolleyballMatchResultsDto: markAllPropertiesNullable,
+  // upstream: rankings-score-including-losses-null (discovered 2026-02-22): pre-season ratios can be "Infinity".
   LeagueRankingsEntryDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -132,7 +163,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
-  // SAMS returns null (not omitted) for unset optional player/official fields.
+  // SAMS returns null (not omitted) for unset optional fields — discovered 2026-02-22 (roster probes).
   TeamPlayerDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -195,6 +226,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
+  // upstream: hierarchy-parent-null (discovered 2026-02-22).
   LeagueHierarchyDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -205,11 +237,80 @@ export const schemaPatches: Record<string, SchemaPatch> = {
           value.nullable = false;
           break;
         case "parentLeagueHierarchyUuid":
-          // Upstream may return null for root hierarchy nodes.
           value.nullable = true;
           break;
         default:
           break;
+      }
+    }
+  },
+  // upstream: competition-null-timestamps (discovered 2026-08-27).
+  // upstream: embedded-sub-competitions-array (discovered 2026-08-27) — relax `_embedded` HAL shape.
+  CompetitionDto: (schema) => {
+    if (!schema.properties) return;
+    schema.properties._embedded = {
+      type: "object",
+      additionalProperties: true,
+    };
+    for (const [key, property] of Object.entries(schema.properties)) {
+      if (key === "_embedded") continue;
+      const value = asSchemaProperty(property);
+      if (!value) continue;
+      switch (key) {
+        case "uuid":
+          value.nullable = false;
+          break;
+        case "superCompetitionUuid":
+        case "latestResultUpdate":
+        case "latestStructuralUpdate":
+          value.nullable = true;
+          break;
+        default:
+          value.nullable = true;
+      }
+    }
+  },
+  // upstream: competition-null-timestamps + embedded-sub-competitions-array (discovered 2026-08-27).
+  SuperCompetitionDto: (schema) => {
+    if (!schema.properties) return;
+    schema.properties._embedded = {
+      type: "object",
+      additionalProperties: true,
+    };
+    for (const [key, property] of Object.entries(schema.properties)) {
+      if (key === "_embedded") continue;
+      const value = asSchemaProperty(property);
+      if (!value) continue;
+      switch (key) {
+        case "uuid":
+          value.nullable = false;
+          break;
+        case "superCompetitionUuid":
+        case "latestResultUpdate":
+        case "latestStructuralUpdate":
+          value.nullable = true;
+          break;
+        default:
+          value.nullable = true;
+      }
+    }
+  },
+  // upstream: competition-null-timestamps (discovered 2026-08-27).
+  LeagueDto: (schema) => {
+    if (!schema.properties) return;
+    for (const [key, property] of Object.entries(schema.properties)) {
+      const value = asSchemaProperty(property);
+      if (!value) continue;
+      switch (key) {
+        case "uuid":
+          value.nullable = false;
+          break;
+        case "latestResultUpdate":
+        case "latestStructuralUpdate":
+          value.nullable = true;
+          break;
+        default:
+          value.nullable = true;
       }
     }
   },

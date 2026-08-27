@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Check, test & pack
+  unit:
+    name: "Test: unit"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -22,10 +22,35 @@ jobs:
         run: vp check
 
       - name: Test
-        run: vp test
+        run: vp test --reporter=json --outputFile=vitest-unit.json
+
+      - name: Write test summary
+        if: always()
+        run: vp run write-test-summary unit vitest-unit.json
 
       - name: Pack
         run: vp pack
 
       - name: Audit production dependencies
         run: vp pm audit -- --prod
+
+  api:
+    name: "Test: live API"
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Live API tests
+        env:
+          SAMS_API_KEY: ${{ secrets.SAMS_API_KEY }}
+        run: SAMS_LIVE=1 vp test src/live --reporter=json --outputFile=vitest-live.json
+
+      - name: Write test summary
+        if: always()
+        run: vp run write-test-summary live vitest-live.json

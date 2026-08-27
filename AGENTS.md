@@ -41,18 +41,20 @@ Valid key: length **36**, prefix **`3fe`**. Length 49 or prefix `htt` means stal
 
 ## Key files
 
-| Path                            | Role                                                    |
-| ------------------------------- | ------------------------------------------------------- |
-| `src/create-sams-client.ts`     | Client factory; always sets `Accept: */*` + `X-API-Key` |
-| `src/codegen/schema-patches.ts` | OpenAPI schema fixes before codegen                     |
-| `src/generated/`                | Generated SDK — regenerate, don't hand-edit             |
-| `scripts/generate-client.ts`    | Codegen (no API key)                                    |
-| `scripts/check-sams-bugs.ts`    | Live bug probes (#2–#8)                                 |
-| `scripts/smoke-test-client.ts`  | Live smoke (public + protected endpoints)               |
-| `docs/BUGS.md`                  | Documented upstream API defects                         |
-| `.cursor/environment.json`      | Cloud Agent bootstrap (`vp install`)                    |
-| `.github/dependabot.yml`        | Dependency update schedule and grouping                 |
-| `vite.config.ts`                | Vite+ config (test, check, pack)                        |
+| Path                                | Role                                                    |
+| ----------------------------------- | ------------------------------------------------------- |
+| `src/create-sams-client.ts`         | Client factory; always sets `Accept: */*` + `X-API-Key` |
+| `src/codegen/schema-patches.ts`     | OpenAPI schema fixes before codegen                     |
+| `src/generated/`                    | Generated SDK — regenerate, don't hand-edit             |
+| `scripts/generate-client.ts`        | Codegen (no API key)                                    |
+| `src/upstream/bugs.ts`              | Upstream defect registry (slug + id)                    |
+| `src/upstream/bug-probes.ts`        | Live upstream bug probes                                |
+| `src/test-support/live-fixtures.ts` | Stable UUIDs for live probes/smoke                      |
+| `scripts/check-sams-bugs.ts`        | CLI wrapper for `vp run bugs`                           |
+| `docs/BUGS.md`                      | Documented upstream API defects                         |
+| `.cursor/environment.json`          | Cloud Agent bootstrap (`vp install`)                    |
+| `.github/dependabot.yml`            | Dependency update schedule and grouping                 |
+| `vite.config.ts`                    | Vite+ config (test, check, pack)                        |
 
 ## Verification checklist
 
@@ -96,7 +98,7 @@ Edit `src/codegen/schema-patches.ts`, regenerate, add/adjust tests in `src/codeg
 
 ### Update smoke/bug fixtures
 
-Known UUIDs live in `scripts/check-sams-bugs.ts` (e.g. VC Müllheim team `c2ddea7c-b7ec-4172-aa85-4d9c47aba362`).
+Known UUIDs: `src/test-support/live-fixtures.ts`. Bug slugs: `src/upstream/bugs.ts`.
 
 ## Out of scope
 

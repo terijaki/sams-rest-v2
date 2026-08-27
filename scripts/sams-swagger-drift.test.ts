@@ -238,10 +238,18 @@ describe("check-sams-swagger-drift CLI", () => {
         }),
       );
 
+      const isolatedEnv = { ...process.env };
+      delete isolatedEnv.GITHUB_OUTPUT;
+      delete isolatedEnv.GITHUB_STEP_SUMMARY;
+
       const sameOutput = execFileSync(
         "bun",
         ["scripts/check-sams-swagger-drift.ts", committed, regeneratedSame],
-        { encoding: "utf8", cwd: process.cwd() },
+        {
+          encoding: "utf8",
+          cwd: process.cwd(),
+          env: isolatedEnv,
+        },
       );
       const sameResult = JSON.parse(sameOutput) as { hasDrift: boolean; changeCount: number };
       expect(sameResult.hasDrift).toBe(false);

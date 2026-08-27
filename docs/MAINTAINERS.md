@@ -18,16 +18,17 @@ Cloud Agents bootstrap via `.cursor/environment.json` (installs `vp`, then `vp i
 
 ## Day-to-day commands
 
-| Command                 | Purpose                                                   |
-| ----------------------- | --------------------------------------------------------- |
-| `vp check`              | Format, lint, and type-check                              |
-| `vp test`               | Unit tests (no live API, no key)                          |
-| `vp pack`               | Build library to `dist/`                                  |
-| `vp pm audit -- --prod` | Audit shipped dependencies (not dev tooling)              |
-| `vp run generate`       | Regenerate client from upstream swagger                   |
-| `vp run bugs`           | Live upstream bug probes (needs `SAMS_API_KEY`)           |
-| `vp run smoke`          | Live `createSamsClient` smoke test (needs `SAMS_API_KEY`) |
-| `vp run swagger:drift`  | Compare two `source.json` snapshots (CI helper)           |
+| Command                 | Purpose                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `vp check`              | Format, lint, and type-check                                                          |
+| `vp test`               | Unit tests + MSW contract suite (no live API, no key)                                 |
+| `vp run test:api`       | Live SDK graph test through production SAMS (needs key)                               |
+| `vp pack`               | Build library to `dist/`                                                              |
+| `vp pm audit -- --prod` | Audit shipped dependencies (not dev tooling)                                          |
+| `vp run generate`       | Regenerate client from upstream swagger                                               |
+| `vp run bugs`           | Live upstream bug probes — JSON report, always exits 0 (`src/upstream/bug-probes.ts`) |
+| `vp run smoke`          | Fast live header/key check (`src/live/sams-smoke.live.test.ts`, needs key)            |
+| `vp run swagger:drift`  | Compare two `source.json` snapshots (CI helper)                                       |
 
 Use `vp run <script>` for `package.json` scripts. Use built-in `vp test`, `vp check`, `vp pack` directly — not `npm run` / `bun run`.
 
@@ -57,7 +58,18 @@ vp run bugs    # exits 0; reports still_present / fixed / check_failed per bug
 vp run smoke   # public + protected endpoint; fails on HTTP 403
 ```
 
-Fixture UUIDs for live checks: `scripts/check-sams-bugs.ts` (also referenced in [BUGS.md](BUGS.md)).
+Fixture UUIDs for live checks: `src/test-support/live-fixtures.ts` (also referenced in [BUGS.md](BUGS.md)).
+
+Baseline endpoint manifest (`src/test-support/baseline-endpoints.ts`): SDK operations a typical club-site integration needs. CI appends a job summary (`scripts/write-ci-test-summary.ts`) listing each graph endpoint case after `vp test` / live tests. Graph suites use `describeSamsApiGraphSuite` so Vitest reports one case per SDK operation.
+
+### Tests vs scripts
+
+| Kind                                                               | Examples                                                | Role                                                                          |
+| ------------------------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)          | unit, MSW contract, live graph, live smoke, live roster | Pass/fail gates — fail CI on regression                                       |
+| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`) | JSON reports, codegen, workflow glue                    | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only |
+
+Upstream defect registry: `src/upstream/bugs.ts` (slug + numeric id). Live probe implementations: `src/upstream/bug-probes.ts`. Human-readable catalogue: [BUGS.md](BUGS.md). Prefer **slug** in code comments; numeric **#** remains in weekly reports for history.
 
 ### Secrets
 
@@ -70,14 +82,18 @@ These are **separate** — configuring one does not configure the other.
 
 ## CI workflows
 
-| Workflow           | Trigger                | Purpose                                                   |
-| ------------------ | ---------------------- | --------------------------------------------------------- |
-| `ci.yml`           | PR                     | `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod` |
-| `version-bump.yml` | PR opened/updated      | Patch-bump `package.json` on PR branch                    |
-| `publish.yml`      | Merge to `main`        | Chained verify → `npm publish` (OIDC), git tag/release    |
-| `weekly.yml`       | Saturday cron / manual | Swagger drift, live bugs, drift PR                        |
+Job names use a `Category: detail` schema (e.g. `Test: unit`, `Release: version bump`).
+
+| Workflow           | Trigger                | Jobs                                                                                                      | Purpose                                                                                                       |
+| ------------------ | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`           | PR                     | `Test: unit`, `Test: live API`                                                                            | Unit: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; live: `vp test src/live` with `SAMS_API_KEY` |
+| `version-bump.yml` | PR opened/updated      | `Release: version bump`                                                                                   | Patch-bump `package.json` on PR branch                                                                        |
+| `publish.yml`      | Merge to `main`        | `Test: verify`, `Release: publish`                                                                        | Verify (unit + pack + live API) → `npm publish` (OIDC), git tag/release                                       |
+| `weekly.yml`       | Saturday cron / manual | `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify` | Swagger drift, live bugs, regenerate/verify, drift PR, actionable notifications                               |
 
 ### Weekly health check
+
+Jobs: `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify`.
 
 1. **Swagger drift** — regenerate without key, semantically compare `src/generated/source.json`
 2. **Bug check** — `vp run bugs` with `SAMS_API_KEY`
@@ -160,10 +176,12 @@ src/
   constants.ts            # Base URL + swagger URL
   codegen/                # Schema patches for hey-api
   generated/              # Generated SDK, types, Zod (do not hand-edit)
+  upstream/               # Bug registry + live probes
+  live/                   # Live API vitest suites (graph + smoke)
+  test-support/           # Graph walker + live fixture UUIDs
 scripts/
   generate-client.ts      # Codegen entrypoint
-  check-sams-bugs.ts      # Live bug probes
-  smoke-test-client.ts    # Live client smoke test
+  check-sams-bugs.ts      # Thin CLI for vp run bugs
   check-sams-swagger-drift.ts
 docs/
   BUGS.md                 # Verified upstream API defects

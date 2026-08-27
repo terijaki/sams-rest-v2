@@ -8,16 +8,22 @@ All issues are upstream API defects, unless noted otherwise.
 
 ## Bug Index
 
-| #   | Endpoint                                                       | Severity | Summary                                                                                                       |
-| --- | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| 1   | `GET /associations`                                            | High     | SBVV (`2b7571b5-…`) absent from paginated list despite existing as a direct resource                          |
-| 2   | `GET /teams/{uuid}`                                            | Medium   | `logoImageForScreenOutputLink` always `null` despite being documented as a `url`-format field                 |
-| 3   | `GET /leagues/{uuid}/rankings`                                 | Low      | `scoreIncludingLosses` always `null`                                                                          |
-| 4   | Any endpoint                                                   | Low      | `Accept: application/json` returns HTTP 406 — only `application/hal+json` is served                           |
-| 5   | `GET /teams/{uuid}`                                            | Low      | `shortName` and `clubCode` return `""` for unset values instead of `null`                                     |
-| 6   | `GET /match-days/{uuid}/league-matches`, `GET /league-matches` | Low      | `date` field declared as `format: date-time` but API returns a date-only string (`YYYY-MM-DD`)                |
-| 7   | `GET /match-days/{uuid}/league-matches`, `GET /league-matches` | High     | `referees` and `results` fields use `$ref + nullable: true` — invalid per OpenAPI 3.0; breaks code generators |
-| 8   | `GET /league-hierarchies`                                      | Medium   | `parentLeagueHierarchyUuid` is documented as non-null string but API returns `null` for root hierarchy nodes  |
+| #   | Slug                                   | Endpoint                                                              | Severity | Summary                                                                                                                         |
+| --- | -------------------------------------- | --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `sbvv-missing-from-associations`       | `GET /associations`                                                   | High     | SBVV (`2b7571b5-…`) absent from paginated list despite existing as a direct resource                                            |
+| 2   | `team-logo-screen-null`                | `GET /teams/{uuid}`                                                   | Medium   | `logoImageForScreenOutputLink` always `null` despite being documented as a `url`-format field                                   |
+| 3   | `rankings-score-including-losses-null` | `GET /leagues/{uuid}/rankings`                                        | Low      | `scoreIncludingLosses` always `null`                                                                                            |
+| 4   | `accept-json-406`                      | Any endpoint                                                          | Low      | `Accept: application/json` returns HTTP 406 — only `application/hal+json` is served                                             |
+| 5   | `team-empty-string-nullables`          | `GET /teams/{uuid}`                                                   | Low      | `shortName` and `clubCode` return `""` for unset values instead of `null`                                                       |
+| 6   | `match-date-format`                    | `GET /match-days/{uuid}/league-matches`, `GET /league-matches`        | Low      | `date` field declared as `format: date-time` but API returns a date-only string (`YYYY-MM-DD`)                                  |
+| 7   | `match-ref-results-nullable-ref`       | `GET /match-days/{uuid}/league-matches`, `GET /league-matches`        | High     | `referees` and `results` fields use `$ref + nullable: true` — invalid per OpenAPI 3.0; breaks code generators                   |
+| 8   | `hierarchy-parent-null`                | `GET /league-hierarchies`                                             | Medium   | `parentLeagueHierarchyUuid` is documented as non-null string but API returns `null` for root hierarchy nodes                    |
+| 9   | `competition-null-timestamps`          | `GET /competitions`, `GET /leagues/{uuid}`, `GET /super-competitions` | Medium   | `superCompetitionUuid`, `latestResultUpdate`, `latestStructuralUpdate` return `null` when unset but spec omits `nullable: true` |
+| 10  | `embedded-sub-competitions-array`      | `GET /super-competitions`                                             | Medium   | `_embedded.sub_competitions` is a JSON array but spec models `_embedded` values as objects (record), breaking strict validators |
+| 11  | `matchday-date-format`                 | `GET /leagues/{uuid}/match-days`, `GET /match-days`                   | Low      | `matchdate` declared as `format: date-time` but API returns a date-only string (`YYYY-MM-DD`)                                   |
+| 12  | `event-types-array-response`           | `GET /event-types`                                                    | Medium   | Returns a JSON array of event types but spec declares a single `EventType` object                                               |
+
+Slug is the stable code identifier (`src/upstream/bugs.ts`). Numeric `#` is kept for weekly report history.
 
 ---
 
@@ -137,3 +143,75 @@ Note that the `time` is a separate string field (`HH:mm`), confirming the intent
 
 **Impact:** The generated SDK/Zod response validator rejects valid hierarchy responses with `Invalid input: expected string, received null`. This broke `/tabelle` sorting when reading hierarchy levels through `getAllLeagueHierarchies`.  
 **Workaround:** Patch `LeagueHierarchyDto` in `parser.patch.schemas` (`src/codegen/schema-patches.ts`) to make `parentLeagueHierarchyUuid` nullable before regenerating the client.
+
+---
+
+### Bug 9 — Competition/League timestamp fields return `null` when unset
+
+**Endpoints:** `GET /competitions`, `GET /competitions/{uuid}`, `GET /leagues/{uuid}`, `GET /super-competitions`, `GET /super-competitions/{uuid}`  
+**Discovered:** 2026-08-27 (PR #11 live CI, `getAllCompetitions` Zod failure)  
+**Spec (`CompetitionDto`, `LeagueDto`, `SuperCompetitionDto`):** `superCompetitionUuid`, `latestResultUpdate`, and `latestStructuralUpdate` are `type: string` / `format: date-time` with no `nullable: true`.  
+**Actual:** Unset values are returned as JSON `null`, not omitted.
+
+```json
+{
+  "superCompetitionUuid": null,
+  "latestResultUpdate": null,
+  "latestStructuralUpdate": null
+}
+```
+
+**Impact:** Generated Zod validators reject valid list/detail responses (`expected string, received null`).  
+**Workaround:** Patch the three DTOs in `src/codegen/schema-patches.ts` to set `nullable: true` on those fields before regenerating. Live probe: `competition-null-timestamps` (`vp run bugs`).
+
+---
+
+### Bug 10 — `_embedded.sub_competitions` is an array, spec expects object map
+
+**Endpoint:** `GET /super-competitions` (embedded sub-competitions per operation description)  
+**Discovered:** 2026-08-27 (PR #11 live CI, `getAllSuperCompetitions` Zod failure)  
+**Spec (`SuperCompetitionDto._embedded`):** `type: object` with `additionalProperties: { type: object }` — each embedded key maps to an object.  
+**Actual:** Sub-competitions are returned as a HAL array under `_embedded.sub_competitions`.
+
+```json
+{
+  "_embedded": {
+    "sub_competitions": [{ "uuid": "…", "name": "…" }]
+  }
+}
+```
+
+**Impact:** Code generators emit `z.record(…, z.object(…))` for `_embedded`, which rejects array payloads (`expected record, received array`). Same HAL looseness applies to `CompetitionDto._embedded`.  
+**Workaround:** Replace `_embedded` with `{ type: "object", additionalProperties: true }` on `CompetitionDto` and `SuperCompetitionDto` in `src/codegen/schema-patches.ts`. Live probe: `embedded-sub-competitions-array` (`vp run bugs`).
+
+---
+
+### Bug 11 — `matchdate` field declared as `date-time` but returns a date-only string
+
+**Endpoints:** `GET /leagues/{uuid}/match-days`, `GET /match-days`, `GET /match-days/{uuid}`  
+**Discovered:** 2026-08-27 (PR #11 live CI, `getMatchDaysForLeague` Zod failure)  
+**Spec (`LeagueMatchDayDto`):** `matchdate` is `type: string, format: date-time`.  
+**Actual:** The API returns a plain date string — `YYYY-MM-DD` — with no time component (same pattern as `match-date-format` on match `date`).
+
+```json
+{ "matchdate": "2025-10-04", "name": "1. Spieltag" }
+```
+
+**Impact:** Generated Zod validators reject valid match-day list responses (`Invalid ISO datetime`).  
+**Workaround:** Patch `LeagueMatchDayDto.matchdate` to `format: "date"` in `src/codegen/schema-patches.ts`. Live probe: `matchday-date-format` (`vp run bugs`).
+
+---
+
+### Bug 12 — `GET /event-types` returns an array, spec declares a single object
+
+**Endpoint:** `GET /event-types`  
+**Discovered:** 2026-08-27 (PR #11 live CI, `getEventTypes` Zod failure)  
+**Spec:** Response `200` schema is `$ref: EventType` (one object).  
+**Actual:** Returns a JSON array of event type objects.
+
+```json
+[{ "uuid": "…", "name": "VBL I Schiedsrichterseminare", "category": "Schiedsrichter" }]
+```
+
+**Impact:** Generated Zod validator rejects valid responses (`expected object, received array`).  
+**Workaround:** Patch operation `GET /event-types` response to `{ type: array, items: { $ref: EventType } }` in `src/codegen/operation-patches.ts`. Live probe: `event-types-array-response` (`vp run bugs`).

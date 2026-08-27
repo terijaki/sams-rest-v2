@@ -24,6 +24,8 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
+    exclude: process.env.SAMS_LIVE === "1" ? [] : ["src/**/*.live.test.ts"],
     environment: "node",
+    reporters: process.env.CI ? ["verbose"] : ["default"],
   },
 });

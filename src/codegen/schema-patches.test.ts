@@ -109,18 +109,102 @@ describe("schemaPatches", () => {
     expect(schema.properties.parentLeagueHierarchyUuid.nullable).toBe(true);
   });
 
-  it("covers the same schema names as vcmuellheim generate-client.ts", () => {
+  it("relaxes CompetitionDto and SuperCompetitionDto _embedded and nullable timestamp fields", () => {
+    const competitionSchema: PatchableSchema = {
+      properties: {
+        uuid: { type: "string" },
+        _embedded: {
+          type: "object",
+          additionalProperties: { type: "object" },
+        },
+        superCompetitionUuid: { type: "string" },
+        latestResultUpdate: { type: "string", format: "date-time" },
+        latestStructuralUpdate: { type: "string", format: "date-time" },
+        name: { type: "string" },
+      },
+    };
+
+    schemaPatches.CompetitionDto(competitionSchema);
+
+    expect(competitionSchema.properties._embedded).toEqual({
+      type: "object",
+      additionalProperties: true,
+    });
+    expect(competitionSchema.properties.superCompetitionUuid.nullable).toBe(true);
+    expect(competitionSchema.properties.latestResultUpdate.nullable).toBe(true);
+    expect(competitionSchema.properties.latestStructuralUpdate.nullable).toBe(true);
+
+    const superSchema: PatchableSchema = {
+      properties: {
+        uuid: { type: "string" },
+        _embedded: {
+          type: "object",
+          additionalProperties: { type: "object" },
+        },
+        latestResultUpdate: { type: "string", format: "date-time" },
+      },
+    };
+
+    schemaPatches.SuperCompetitionDto(superSchema);
+
+    expect(superSchema.properties._embedded).toEqual({
+      type: "object",
+      additionalProperties: true,
+    });
+    expect(superSchema.properties.latestResultUpdate.nullable).toBe(true);
+  });
+
+  it("marks LeagueDto latest update fields nullable (competition-null-timestamps)", () => {
+    const schema: PatchableSchema = {
+      properties: {
+        uuid: { type: "string" },
+        latestResultUpdate: { type: "string", format: "date-time" },
+        latestStructuralUpdate: { type: "string", format: "date-time" },
+        name: { type: "string" },
+      },
+    };
+
+    schemaPatches.LeagueDto(schema);
+
+    expect(schema.properties.uuid.nullable).toBe(false);
+    expect(schema.properties.latestResultUpdate.nullable).toBe(true);
+    expect(schema.properties.latestStructuralUpdate.nullable).toBe(true);
+    expect(schema.properties.name.nullable).toBe(true);
+  });
+
+  it("patches LeagueMatchDayDto matchdate format to date (matchday-date-format)", () => {
+    const schema: PatchableSchema = {
+      properties: {
+        uuid: { type: "string" },
+        matchdate: { type: "string", format: "date-time" },
+        name: { type: "string" },
+      },
+    };
+
+    schemaPatches.LeagueMatchDayDto(schema);
+
+    expect(schema.properties.matchdate.format).toBe("date");
+    expect(schema.properties.matchdate.nullable).toBe(true);
+    expect(schema.properties.uuid.nullable).toBe(false);
+    expect(schema.properties.name.nullable).toBe(true);
+  });
+
+  it("lists every patched schema name", () => {
     expect(Object.keys(schemaPatches).sort()).toEqual(
       [
         "Address",
         "Association",
+        "CompetitionDto",
         "CompetitionMatchDto",
+        "LeagueDto",
         "LeagueHierarchyDto",
+        "LeagueMatchDayDto",
         "LeagueMatchDto",
         "LeagueRankingsEntryDto",
         "Location",
         "RefereeTeamDto",
         "SportsclubDto",
+        "SuperCompetitionDto",
         "TeamDto",
         "TeamOfficialDto",
         "TeamPlayerDto",

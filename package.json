@@ -1,6 +1,6 @@
 {
   "name": "sams-rest-v2",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Generated fetch SDK, types, and Zod schemas for the SAMS REST API v2.",
   "keywords": [
     "SAMS",
@@ -46,13 +46,15 @@
     "pack": "vp pack",
     "generate": "bun ./scripts/generate-client.ts",
     "test": "vp test",
+    "test:api": "SAMS_LIVE=1 vp test src/live",
     "typecheck": "vp check",
     "check": "vp check",
     "check:fix": "vp check --fix",
     "bugs": "bun ./scripts/check-sams-bugs.ts",
-    "smoke": "bun ./scripts/smoke-test-client.ts",
+    "smoke": "SAMS_LIVE=1 vp test src/live/sams-smoke.live.test.ts",
     "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
     "notify": "bun ./scripts/sams-notify.ts",
+    "write-test-summary": "bun ./scripts/write-ci-test-summary.ts",
     "prepublishOnly": "vp pack"
   },
   "dependencies": {
@@ -62,6 +64,7 @@
     "@hey-api/openapi-ts": "0.99.0",
     "@types/node": "^26.0.1",
     "@voidzero-dev/vite-plus-core": "0.3.0",
+    "msw": "^2.15.0",
     "typescript": "^6.0.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
     "vite-plus": "0.3.0"
