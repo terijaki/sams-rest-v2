@@ -13,6 +13,8 @@ import {
   SOURCE_JSON_PATH,
 } from "./sams-swagger-drift";
 
+const tsxBin = join(process.cwd(), "node_modules/.bin/tsx");
+
 describe("jsonEqualIgnoringKeyOrder", () => {
   it("treats objects with the same keys and values as equal regardless of key order", () => {
     expect(
@@ -239,7 +241,7 @@ describe("check-sams-swagger-drift CLI", () => {
       );
 
       const sameOutput = execFileSync(
-        "bun",
+        tsxBin,
         ["scripts/check-sams-swagger-drift.ts", committed, regeneratedSame],
         { encoding: "utf8", cwd: process.cwd() },
       );
@@ -250,7 +252,7 @@ describe("check-sams-swagger-drift CLI", () => {
       writeFileSync(githubOutput, "");
       writeFileSync(githubStepSummary, "");
       const changedOutput = execFileSync(
-        "bun",
+        tsxBin,
         ["scripts/check-sams-swagger-drift.ts", committed, regeneratedChanged],
         {
           encoding: "utf8",

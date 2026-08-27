@@ -61,14 +61,22 @@ Package the library for npm with [Vite+ pack](https://viteplus.dev/guide/pack):
 vp pack
 ```
 
-Requires [Bun](https://bun.sh/) (`packageManager: bun@1.3.14`) and Node.js **22.18+**.
+Development uses [Vite+](https://viteplus.dev/) (`vp`). It resolves the configured package manager (`packageManager: bun@1.3.14`) and Node.js **22.18+**.
+
+```bash
+vp install
+vp check
+vp test
+vp pack
+```
 
 ## Live bug probes
 
 Known upstream bugs are re-checked against the real API:
 
 ```bash
-SAMS_API_KEY=… bun run bugs
+SAMS_API_KEY=… vp run bugs
+SAMS_API_KEY=… vp run smoke
 ```
 
 Use the key only for this command (and the weekly CI job). Never print, log, commit, or put it in fixtures.

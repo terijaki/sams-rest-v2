@@ -44,14 +44,15 @@
   "scripts": {
     "build": "vp pack",
     "pack": "vp pack",
-    "generate": "bun ./scripts/generate-client.ts",
+    "generate": "tsx ./scripts/generate-client.ts",
     "test": "vp test",
     "typecheck": "vp check",
     "check": "vp check",
     "check:fix": "vp check --fix",
-    "bugs": "bun ./scripts/check-sams-bugs.ts",
-    "smoke": "bun ./scripts/smoke-test-client.ts",
-    "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
+    "bugs": "tsx ./scripts/check-sams-bugs.ts",
+    "smoke": "tsx ./scripts/smoke-test-client.ts",
+    "swagger:drift": "tsx ./scripts/check-sams-swagger-drift.ts",
+    "notify": "tsx ./scripts/sams-notify.ts",
     "prepublishOnly": "vp pack"
   },
   "dependencies": {
@@ -61,6 +62,7 @@
     "@hey-api/openapi-ts": "0.99.0",
     "@types/node": "^22.18.0",
     "@voidzero-dev/vite-plus-core": "0.3.0",
+    "tsx": "^4.23.12",
     "typescript": "^6.0.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
     "vite-plus": "0.3.0"
