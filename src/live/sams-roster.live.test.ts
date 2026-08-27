@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vite-plus/test";
+import { beforeAll, describe, expect, it } from "vite-plus/test";
 import { createSamsClient } from "../create-sams-client";
 import { SAMS_DEFAULT_BASE_URL } from "../constants";
 import {
@@ -15,33 +15,32 @@ function requireSamsApiKey(): string {
   return apiKey;
 }
 
-describe("live SAMS team roster", () => {
-  it("returns players and officials for the fixture team", async () => {
-    const sams = createSamsClient({
+describe("SAMS team roster (live fixture)", () => {
+  let sams: ReturnType<typeof createSamsClient>;
+
+  beforeAll(() => {
+    sams = createSamsClient({
       baseUrl: SAMS_DEFAULT_BASE_URL,
       apiKey: requireSamsApiKey(),
       throwOnError: true,
     });
+  });
 
+  it("getTeamRosterByTeamUuid returns a roster document", async () => {
     const { data: roster } = await sams.getTeamRosterByTeamUuid({
       path: { uuid: LIVE_FIXTURES.teamUuid },
     });
-
     expect(roster).toBeDefined();
     assertTeamRosterStructure(roster!);
     assertTeamRosterHasMembers(roster!);
+  }, 30_000);
 
-    const players = roster!.players ?? [];
+  it("getTeamRosterByTeamUuid players have uuid and name", async () => {
+    const { data: roster } = await sams.getTeamRosterByTeamUuid({
+      path: { uuid: LIVE_FIXTURES.teamUuid },
+    });
+    const players = roster?.players ?? [];
     expect(players.length).toBeGreaterThan(0);
     expect(players.every((player) => player.uuid && player.name?.trim())).toBe(true);
-
-    for (const player of players) {
-      expect(player).toEqual(
-        expect.objectContaining({
-          uuid: expect.any(String),
-          name: expect.any(String),
-        }),
-      );
-    }
   }, 30_000);
 });

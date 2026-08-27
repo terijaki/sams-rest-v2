@@ -4,7 +4,7 @@ import { SAMS_DEFAULT_BASE_URL } from "../constants";
 import { createForbiddenTeamHandler } from "./handlers";
 import { ids } from "./fixtures";
 import { server } from "./server";
-import { walkSamsApiGraph } from "../test-support/api-graph";
+import { describeSamsApiGraphSuite } from "../test-support/api-graph";
 
 describe("createSamsClient against MSW", () => {
   beforeAll(() => {
@@ -19,17 +19,17 @@ describe("createSamsClient against MSW", () => {
     server.close();
   });
 
-  it("walks the SAMS GET graph with native fetch and Zod validators", async () => {
-    const sams = createSamsClient({
-      baseUrl: SAMS_DEFAULT_BASE_URL,
-      apiKey: "test-fixture-key",
-      throwOnError: true,
-    });
-
-    await expect(walkSamsApiGraph(sams)).resolves.toBeUndefined();
+  describeSamsApiGraphSuite({
+    suiteName: "SAMS API graph",
+    createClient: () =>
+      createSamsClient({
+        baseUrl: SAMS_DEFAULT_BASE_URL,
+        apiKey: "test-fixture-key",
+        throwOnError: true,
+      }),
   });
 
-  it("returns error instead of throwing when throwOnError is false", async () => {
+  it("getTeamByUuid returns error instead of throwing when throwOnError is false", async () => {
     server.use(createForbiddenTeamHandler());
 
     const sams = createSamsClient({

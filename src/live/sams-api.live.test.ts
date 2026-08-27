@@ -1,7 +1,6 @@
-import { describe, expect, it } from "vite-plus/test";
 import { createSamsClient } from "../create-sams-client";
 import { SAMS_DEFAULT_BASE_URL } from "../constants";
-import { walkSamsApiGraph } from "../test-support/api-graph";
+import { describeSamsApiGraphSuite } from "../test-support/api-graph";
 
 function requireSamsApiKey(): string {
   const apiKey = process.env.SAMS_API_KEY;
@@ -11,14 +10,13 @@ function requireSamsApiKey(): string {
   return apiKey;
 }
 
-describe("live SAMS API", () => {
-  it("walks the SAMS GET graph against production", async () => {
-    const sams = createSamsClient({
+describeSamsApiGraphSuite({
+  suiteName: "SAMS API graph (live)",
+  timeoutMs: 60_000,
+  createClient: () =>
+    createSamsClient({
       baseUrl: SAMS_DEFAULT_BASE_URL,
       apiKey: requireSamsApiKey(),
       throwOnError: true,
-    });
-
-    await expect(walkSamsApiGraph(sams)).resolves.toBeUndefined();
-  }, 60_000);
+    }),
 });
