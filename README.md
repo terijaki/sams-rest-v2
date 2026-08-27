@@ -6,13 +6,7 @@ TypeScript client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/RE
 
 ```bash
 pnpm add sams-rest-v2
-```
-
-```bash
 bun add sams-rest-v2
-```
-
-```bash
 deno add npm:sams-rest-v2
 ```
 
