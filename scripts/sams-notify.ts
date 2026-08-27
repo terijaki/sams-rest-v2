@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 /**
  * Creates a GitHub issue summarising the SAMS health check results.
  * Invoked by .github/workflows/weekly.yml (notify job).
