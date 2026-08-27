@@ -51,6 +51,7 @@ Valid key: length **36**, prefix **`3fe`**. Length 49 or prefix `htt` means stal
 | `scripts/smoke-test-client.ts`  | Live smoke (public + protected endpoints)               |
 | `docs/BUGS.md`                  | Documented upstream API defects                         |
 | `.cursor/environment.json`      | Cloud Agent bootstrap (`vp install`)                    |
+| `.github/dependabot.yml`        | Dependency update schedule and grouping                 |
 | `vite.config.ts`                | Vite+ config (test, check, pack)                        |
 
 ## Verification checklist
@@ -67,6 +68,10 @@ vp run smoke                          # needs SAMS_API_KEY; fails on HTTP 403
 ```
 
 Smoke test must hit a **protected** endpoint (e.g. `getTeamByUuid`), not only public `/seasons`.
+
+### Dependabot PRs
+
+Dependabot opens grouped PRs per [`.github/dependabot.yml`](.github/dependabot.yml). Before merging any Dependabot PR, run the verification checklist above. Do not auto-merge semver-major updates without review. Security PRs are immediate; version PRs follow monthly (bun) or quarterly (actions) schedules.
 
 ## API behaviour agents should know
 
