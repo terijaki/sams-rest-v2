@@ -8,4 +8,5 @@ node_modules/
 **/test-results/
 dist/
 coverage/
+vitest-*.json
 *.tgz
