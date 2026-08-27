@@ -11,7 +11,6 @@
         "@hey-api/openapi-ts": "0.99.0",
         "@types/node": "^22.18.0",
         "@voidzero-dev/vite-plus-core": "0.3.0",
-        "tsx": "^4.23.12",
         "typescript": "^6.0.3",
         "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
         "vite-plus": "0.3.0",

@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 /**
  * Live smoke test for createSamsClient against the SAMS API.
  *
