@@ -155,7 +155,7 @@ Security PRs bypass the monthly/quarterly schedule and cooldown.
 
 1. **Version bump** — automatic on PR branch via `version-bump.yml`
 2. **CI on PR** — `ci.yml` gates merge via branch protection
-3. **Publish on merge** — `publish.yml` runs chained verify job then publish (not parallel with `ci.yml`)
+3. **Publish on merge** — `publish.yml` runs chained verify job then publish (not parallel with `ci.yml`); GitHub release notes use the merged PR's `## Summary` section when present, otherwise GitHub auto-generated notes
 
 Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC from GitHub Actions). **Do not** replace `npm publish` with `bun publish` — bun does not support OIDC trusted publishing yet.
 
