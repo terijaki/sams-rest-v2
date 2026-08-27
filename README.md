@@ -2,7 +2,7 @@
 
 Generated client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle). OpenAPI is fetched from `https://www.volleyball-baden.de/api/v2/swagger.json`.
 
-Requires Node.js **22.18+** (`@hey-api/openapi-ts` 0.99).
+Requires Node.js **22.18+** (`@hey-api/openapi-ts` 0.99) and TypeScript **6.x** (7.x breaks codegen until hey-api catches up).
 
 ## Install
 
