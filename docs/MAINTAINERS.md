@@ -82,14 +82,18 @@ These are **separate** — configuring one does not configure the other.
 
 ## CI workflows
 
-| Workflow           | Trigger                | Purpose                                                                                                              |
-| ------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`           | PR                     | Unit job: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; then live `vp run test:api` with `SAMS_API_KEY` |
-| `version-bump.yml` | PR opened/updated      | Patch-bump `package.json` on PR branch                                                                               |
-| `publish.yml`      | Merge to `main`        | Verify (incl. live `vp run test:api`) → `npm publish` (OIDC), git tag/release                                        |
-| `weekly.yml`       | Saturday cron / manual | Swagger drift, live bugs, drift PR                                                                                   |
+Job names use a `Category: detail` schema (e.g. `Test: unit`, `Release: version bump`).
+
+| Workflow           | Trigger                | Jobs                                                                                                                 | Purpose                                                                                                              |
+| ------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`           | PR                     | `Test: unit`, `Test: live API`                                                                                       | Unit: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; live: `vp test src/live` with `SAMS_API_KEY`        |
+| `version-bump.yml` | PR opened/updated      | `Release: version bump`                                                                                              | Patch-bump `package.json` on PR branch                                                                               |
+| `publish.yml`      | Merge to `main`        | `Test: verify`, `Release: publish`                                                                                   | Verify (unit + pack + live API) → `npm publish` (OIDC), git tag/release                                              |
+| `weekly.yml`       | Saturday cron / manual | `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify`            | Swagger drift, live bugs, regenerate/verify, drift PR, actionable notifications                                      |
 
 ### Weekly health check
+
+Jobs: `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify`.
 
 1. **Swagger drift** — regenerate without key, semantically compare `src/generated/source.json`
 2. **Bug check** — `vp run bugs` with `SAMS_API_KEY`

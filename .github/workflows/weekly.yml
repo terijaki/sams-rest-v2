@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   swagger-drift:
-    name: Check Swagger Drift
+    name: Health: swagger drift
     runs-on: ubuntu-latest
     outputs:
       has_drift: ${{ steps.diff.outputs.has_drift }}
@@ -49,7 +49,7 @@ jobs:
           include-hidden-files: true
 
   pr-drift:
-    name: Open PR for swagger drift
+    name: Health: drift PR
     needs: [swagger-drift, regenerate]
     if: |
       always() &&
@@ -106,7 +106,7 @@ jobs:
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
 
   bug-check:
-    name: Check Known API Bugs
+    name: Health: bug probes
     runs-on: ubuntu-latest
     outputs:
       has_fixed: ${{ steps.parse.outputs.has_fixed }}
@@ -166,7 +166,7 @@ jobs:
           "
 
   regenerate:
-    name: Regenerate & Verify
+    name: Health: regenerate
     runs-on: ubuntu-latest
     outputs:
       failed: ${{ steps.result.outputs.failed }}
@@ -221,7 +221,7 @@ jobs:
           fi
 
   notify:
-    name: Create Issue if Actionable
+    name: Health: notify
     needs: [swagger-drift, bug-check, regenerate, pr-drift]
     if: always()
     runs-on: ubuntu-latest
