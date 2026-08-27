@@ -27,10 +27,10 @@ function setResponseSchema(
 
 /**
  * Operation-level OpenAPI patches applied before codegen.
- * Keep in sync with docs/BUGS.md and scripts/check-sams-bugs.ts.
+ * Registry: src/upstream/bugs.ts · Live probes: src/upstream/bug-probes.ts
  */
 export const operationPatches: Record<string, (operation: OperationObject) => void> = {
-  // Bug #12 (discovered 2026-08-27): `GET /event-types` returns a JSON array but spec declares a single EventType.
+  // upstream: event-types-array-response (discovered 2026-08-27)
   "GET /event-types": (operation) => {
     const schema = responseSchema(operation);
     if (!schema?.$ref) return;

@@ -109,7 +109,7 @@ describe("schemaPatches", () => {
     expect(schema.properties.parentLeagueHierarchyUuid.nullable).toBe(true);
   });
 
-  it("relaxes CompetitionDto and SuperCompetitionDto _embedded and nullable timestamp fields (bugs #9/#10)", () => {
+  it("relaxes CompetitionDto and SuperCompetitionDto _embedded and nullable timestamp fields", () => {
     const competitionSchema: PatchableSchema = {
       properties: {
         uuid: { type: "string" },
@@ -154,7 +154,7 @@ describe("schemaPatches", () => {
     expect(superSchema.properties.latestResultUpdate.nullable).toBe(true);
   });
 
-  it("marks LeagueDto latest update fields nullable (bug #9)", () => {
+  it("marks LeagueDto latest update fields nullable (competition-null-timestamps)", () => {
     const schema: PatchableSchema = {
       properties: {
         uuid: { type: "string" },
@@ -172,7 +172,7 @@ describe("schemaPatches", () => {
     expect(schema.properties.name.nullable).toBe(true);
   });
 
-  it("patches LeagueMatchDayDto matchdate format to date (bug #11)", () => {
+  it("patches LeagueMatchDayDto matchdate format to date (matchday-date-format)", () => {
     const schema: PatchableSchema = {
       properties: {
         uuid: { type: "string" },
@@ -189,7 +189,7 @@ describe("schemaPatches", () => {
     expect(schema.properties.name.nullable).toBe(true);
   });
 
-  it("covers the same schema names as vcmuellheim generate-client.ts", () => {
+  it("lists every patched schema name", () => {
     expect(Object.keys(schemaPatches).sort()).toEqual(
       [
         "Address",

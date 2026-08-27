@@ -151,13 +151,13 @@ jobs:
             const icon = { fixed: '✅', still_present: '⚠️', check_failed: '❌' };
             const label = { fixed: 'Fixed', still_present: 'Still present', check_failed: 'Check failed' };
             const rows = data.bugs.map(b =>
-              '| ' + [b.id, b.summary, icon[b.status] + ' ' + label[b.status]].join(' | ') + ' |'
+              '| ' + [b.id, b.slug, b.summary, icon[b.status] + ' ' + label[b.status]].join(' | ') + ' |'
             );
             const lines = [
               '## Bug check results',
               '',
-              '| # | Bug | Status |',
-              '|---|---|---|',
+              '| # | Slug | Bug | Status |',
+              '|---|---|---|---|',
               ...rows,
               '',
               '_Checked at: ' + data.checkedAt + '_',

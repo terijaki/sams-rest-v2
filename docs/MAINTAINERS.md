@@ -18,17 +18,17 @@ Cloud Agents bootstrap via `.cursor/environment.json` (installs `vp`, then `vp i
 
 ## Day-to-day commands
 
-| Command                 | Purpose                                                   |
-| ----------------------- | --------------------------------------------------------- |
-| `vp check`              | Format, lint, and type-check                              |
-| `vp test`               | Unit tests + MSW contract suite (no live API, no key)     |
-| `vp run test:api`       | Live SDK graph test through production SAMS (needs key)   |
-| `vp pack`               | Build library to `dist/`                                  |
-| `vp pm audit -- --prod` | Audit shipped dependencies (not dev tooling)              |
-| `vp run generate`       | Regenerate client from upstream swagger                   |
-| `vp run bugs`           | Live upstream bug probes (needs `SAMS_API_KEY`)           |
-| `vp run smoke`          | Live `createSamsClient` smoke test (needs `SAMS_API_KEY`) |
-| `vp run swagger:drift`  | Compare two `source.json` snapshots (CI helper)           |
+| Command                 | Purpose                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `vp check`              | Format, lint, and type-check                                                          |
+| `vp test`               | Unit tests + MSW contract suite (no live API, no key)                                 |
+| `vp run test:api`       | Live SDK graph test through production SAMS (needs key)                               |
+| `vp pack`               | Build library to `dist/`                                                              |
+| `vp pm audit -- --prod` | Audit shipped dependencies (not dev tooling)                                          |
+| `vp run generate`       | Regenerate client from upstream swagger                                               |
+| `vp run bugs`           | Live upstream bug probes — JSON report, always exits 0 (`src/upstream/bug-probes.ts`) |
+| `vp run smoke`          | Fast live header/key check (`src/live/sams-smoke.live.test.ts`, needs key)            |
+| `vp run swagger:drift`  | Compare two `source.json` snapshots (CI helper)                                       |
 
 Use `vp run <script>` for `package.json` scripts. Use built-in `vp test`, `vp check`, `vp pack` directly — not `npm run` / `bun run`.
 
@@ -58,7 +58,16 @@ vp run bugs    # exits 0; reports still_present / fixed / check_failed per bug
 vp run smoke   # public + protected endpoint; fails on HTTP 403
 ```
 
-Fixture UUIDs for live checks: `scripts/check-sams-bugs.ts` (also referenced in [BUGS.md](BUGS.md)).
+Fixture UUIDs for live checks: `src/test-support/live-fixtures.ts` (also referenced in [BUGS.md](BUGS.md)).
+
+### Tests vs scripts
+
+| Kind                                                               | Examples                                   | Role                                                                          |
+| ------------------------------------------------------------------ | ------------------------------------------ | ----------------------------------------------------------------------------- |
+| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)          | unit, MSW contract, live graph, live smoke | Pass/fail gates — fail CI on regression                                       |
+| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`) | JSON reports, codegen, workflow glue       | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only |
+
+Upstream defect registry: `src/upstream/bugs.ts` (slug + numeric id). Live probe implementations: `src/upstream/bug-probes.ts`. Human-readable catalogue: [BUGS.md](BUGS.md). Prefer **slug** in code comments; numeric **#** remains in weekly reports for history.
 
 ### Secrets
 
@@ -161,13 +170,12 @@ src/
   constants.ts            # Base URL + swagger URL
   codegen/                # Schema patches for hey-api
   generated/              # Generated SDK, types, Zod (do not hand-edit)
-  msw/                    # MSW handlers + fixtures for contract tests
-  live/                   # Live API test suite (requires SAMS_API_KEY)
-  test-support/           # Shared SDK graph walker for MSW + live tests
+  upstream/               # Bug registry + live probes
+  live/                   # Live API vitest suites (graph + smoke)
+  test-support/           # Graph walker + live fixture UUIDs
 scripts/
   generate-client.ts      # Codegen entrypoint
-  check-sams-bugs.ts      # Live bug probes
-  smoke-test-client.ts    # Live client smoke test
+  check-sams-bugs.ts      # Thin CLI for vp run bugs
   check-sams-swagger-drift.ts
 docs/
   BUGS.md                 # Verified upstream API defects

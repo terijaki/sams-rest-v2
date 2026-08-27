@@ -1,15 +1,14 @@
 /**
  * OpenAPI schema patches applied before @hey-api/openapi-ts generates the client.
  *
- * Lifted from vcmuellheim `codegen/sams/generate-client.ts` (`parser.patch.schemas`).
  * These compensate for upstream SAMS spec/API mismatches; see docs/BUGS.md.
  *
  * When adding a patch for a newly discovered gap, include an inline comment with:
- *   - Bug # from docs/BUGS.md (add an entry there too)
- *   - `discovered YYYY-MM-DD` (date the live API / CI probe first surfaced it)
+ *   - `slug` from src/upstream/bugs.ts (add an entry in docs/BUGS.md too)
+ *   - `discovered YYYY-MM-DD`
  *   - One line on spec vs actual behaviour
  *
- * Live probes: scripts/check-sams-bugs.ts (weekly CI + `vp run bugs`).
+ * Live probes: src/upstream/bug-probes.ts (`vp run bugs`).
  */
 
 export type SchemaObject = {
@@ -91,7 +90,7 @@ function patchMatchDayDto(schema: SchemaObject): void {
   if (!schema.properties) return;
   const matchdate = asSchemaProperty(schema.properties.matchdate);
   if (matchdate) {
-    // Bug #11 (discovered 2026-08-27): same date-only quirk as match `date` (bug #6).
+    // upstream: matchday-date-format (discovered 2026-08-27) — same date-only quirk as match-date-format.
     matchdate.format = "date";
     matchdate.nullable = true;
   }
@@ -114,20 +113,19 @@ function patchMatchDayDto(schema: SchemaObject): void {
  * Keep keys identical to upstream component schema names.
  */
 export const schemaPatches: Record<string, SchemaPatch> = {
-  // Match DTOs — discovered 2026-02-22 (docs/BUGS.md initial audit).
-  // Bug #6: `date` is format date-time in spec but API returns YYYY-MM-DD (time is a separate field).
-  // Bug #7: `referees`/`results`/`location`/MVPs use bare `$ref + nullable` (invalid OAS 3.0); API returns null.
+  // Match DTOs — discovered 2026-02-22.
+  // upstream: match-date-format — `date` is format date-time in spec but API returns YYYY-MM-DD.
+  // upstream: match-ref-results-nullable-ref — bare `$ref + nullable` (invalid OAS 3.0); API returns null.
   // `_embedded.team1/team2` are absent from upstream spec but present in live HAL responses.
   // NOTE: hey-api drops nullable on bare $ref — wrap in `{ allOf: [property], nullable: true }`.
   CompetitionMatchDto: patchMatchDto,
   LeagueMatchDto: patchMatchDto,
-  // Bug #11 (discovered 2026-08-27, PR #11 live CI `getMatchDaysForLeague`): `matchdate` is
-  // format date-time in spec but API returns YYYY-MM-DD (same class of defect as bug #6).
+  // upstream: matchday-date-format (discovered 2026-08-27, live CI getMatchDaysForLeague).
   LeagueMatchDayDto: patchMatchDayDto,
   RefereeTeamDto: markAllPropertiesNullable,
   Location: markAllPropertiesNullable,
   VolleyballMatchResultsDto: markAllPropertiesNullable,
-  // Bug #3 (discovered 2026-02-22): pre-season `ballRatio`/`setRatio` can be the string "Infinity".
+  // upstream: rankings-score-including-losses-null (discovered 2026-02-22): pre-season ratios can be "Infinity".
   LeagueRankingsEntryDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -228,7 +226,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
-  // Bug #8 (discovered 2026-02-22): root nodes return `parentLeagueHierarchyUuid: null` but spec is non-null string.
+  // upstream: hierarchy-parent-null (discovered 2026-02-22).
   LeagueHierarchyDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {
@@ -246,12 +244,8 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
-  // Bug #9 (discovered 2026-08-27, PR #11 live CI `getAllCompetitions`): unset
-  // `superCompetitionUuid` / `latestResultUpdate` / `latestStructuralUpdate` are null in responses
-  // but upstream spec omits `nullable: true` → generated Zod rejects valid payloads.
-  // Bug #10 (discovered 2026-08-27, PR #11 live CI `getAllSuperCompetitions`): `_embedded.sub_competitions`
-  // is a JSON array; spec models `_embedded` values as objects (`additionalProperties: { type: object }`)
-  // → generated Zod expects a record, not an array. Relax `_embedded` to accept any HAL shape.
+  // upstream: competition-null-timestamps (discovered 2026-08-27).
+  // upstream: embedded-sub-competitions-array (discovered 2026-08-27) — relax `_embedded` HAL shape.
   CompetitionDto: (schema) => {
     if (!schema.properties) return;
     schema.properties._embedded = {
@@ -276,7 +270,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
-  // Bug #9 + #10 — same CompetitionDto issues on super-competition list/detail (discovered 2026-08-27).
+  // upstream: competition-null-timestamps + embedded-sub-competitions-array (discovered 2026-08-27).
   SuperCompetitionDto: (schema) => {
     if (!schema.properties) return;
     schema.properties._embedded = {
@@ -301,7 +295,7 @@ export const schemaPatches: Record<string, SchemaPatch> = {
       }
     }
   },
-  // Bug #9 (discovered 2026-08-27): `latestResultUpdate` / `latestStructuralUpdate` null when unset.
+  // upstream: competition-null-timestamps (discovered 2026-08-27).
   LeagueDto: (schema) => {
     if (!schema.properties) return;
     for (const [key, property] of Object.entries(schema.properties)) {

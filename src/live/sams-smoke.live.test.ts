@@ -1,0 +1,43 @@
+import { describe, expect, it } from "vite-plus/test";
+import { createSamsClient } from "../create-sams-client";
+import { SAMS_DEFAULT_BASE_URL } from "../constants";
+import { LIVE_FIXTURES } from "../test-support/live-fixtures";
+
+function requireSamsApiKey(): string {
+  const apiKey = process.env.SAMS_API_KEY;
+  if (!apiKey) {
+    throw new Error("SAMS_API_KEY is not set. Live smoke test requires a key.");
+  }
+  return apiKey;
+}
+
+describe("live SAMS smoke", () => {
+  it("sends required headers and reaches public + protected endpoints", async () => {
+    const capturedHeaders: Record<string, string> = {};
+    const fetchSpy = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      const request = new Request(input, init);
+      request.headers.forEach((value, key) => {
+        capturedHeaders[key.toLowerCase()] = value;
+      });
+      return fetch(input, init);
+    };
+
+    const sams = createSamsClient({
+      baseUrl: SAMS_DEFAULT_BASE_URL,
+      apiKey: requireSamsApiKey(),
+      fetch: fetchSpy,
+    });
+
+    const seasonsResult = await sams.getAllSeasons();
+    expect(seasonsResult.response?.status).not.toBe(403);
+    expect(seasonsResult.error).toBeUndefined();
+
+    expect(capturedHeaders.accept).toBe("*/*");
+    expect(capturedHeaders["x-api-key"]).toBeTruthy();
+
+    const teamResult = await sams.getTeamByUuid({ path: { uuid: LIVE_FIXTURES.teamUuid } });
+    expect(teamResult.response?.status).not.toBe(403);
+    expect(teamResult.error).toBeUndefined();
+    expect(teamResult.data?.uuid).toBe(LIVE_FIXTURES.teamUuid);
+  }, 30_000);
+});

@@ -2,11 +2,9 @@
 /**
  * Creates a GitHub issue summarising the SAMS health check results.
  * Invoked by .github/workflows/weekly.yml (notify job).
- *
- * Reads context from environment variables injected by the workflow.
- * Uses GITHUB_TOKEN for authentication via the GitHub REST API.
  */
 
+import { UPSTREAM_BUGS } from "../src/upstream/bugs";
 import { buildSwaggerDriftSection } from "./sams-swagger-drift";
 
 const token = process.env.GITHUB_TOKEN;
@@ -35,32 +33,18 @@ const prDriftJobFailed = process.env.PR_DRIFT_RESULT === "failure";
 const driftPrUrl = process.env.DRIFT_PR_URL ?? "";
 const driftSummaryMarkdown = process.env.DRIFT_SUMMARY_MARKDOWN ?? "";
 
-const bugDescriptions: Record<number, string> = {
-  2: "`logoImageForScreenOutputLink` always `null` on `GET /teams/{uuid}`",
-  3: "`scoreIncludingLosses` always `null` in `GET /leagues/{uuid}/rankings`",
-  4: "`Accept: application/json` returns HTTP 406 instead of 200",
-  5: '`shortName`/`clubCode` return `""` instead of `null` on `GET /teams/{uuid}`',
-  6: "`date` field declared as `date-time` but API returns a date-only string (`YYYY-MM-DD`)",
-  7: "`referees`/`results` use `$ref + nullable: true` and break code generators",
-  8: "`LeagueHierarchyDto.parentLeagueHierarchyUuid` declared non-null but API returns `null`",
-  9: "Competition/League/SuperCompetition unset fields return `null` but spec omits `nullable: true`",
-  10: "`SuperCompetitionDto._embedded.sub_competitions` is an array but spec models embedded values as objects",
-  11: "`LeagueMatchDayDto.matchdate` declared as `date-time` but API returns a date-only string (`YYYY-MM-DD`)",
-  12: "`GET /event-types` returns an array but spec declares a single `EventType` object",
-};
-
-const allBugIds = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const probedBugs = UPSTREAM_BUGS.filter((bug) => bug.probed);
 const fixedSet = new Set(fixedBugIds);
 const failedSet = new Set(checkFailedIds);
-const rows = allBugIds.map((id) => {
-  const status = fixedSet.has(id)
+const rows = probedBugs.map((bug) => {
+  const status = fixedSet.has(bug.id)
     ? "✅ Fixed"
-    : failedSet.has(id)
+    : failedSet.has(bug.id)
       ? "❌ Check failed"
       : "⚠️ Still present";
-  return `| ${id} | ${bugDescriptions[id]} | ${status} |`;
+  return `| ${bug.id} | \`${bug.slug}\` | ${bug.summary} | ${status} |`;
 });
-const bugTable = ["| # | Bug | Status |", "|---|---|---|", ...rows].join("\n");
+const bugTable = ["| # | Slug | Bug | Status |", "|---|---|---|---|", ...rows].join("\n");
 
 const sections: string[] = [];
 const titleParts: string[] = [];
@@ -81,7 +65,7 @@ if (hasFixed) {
   titleParts.push("✅ bugs fixed");
   sections.push(`## ✅ Upstream Bug(s) Fixed
 
-Bug(s) **${fixedBugIds.join(", ")}** are no longer reproducible against the live API. Review the relevant \`parser.patch.schemas\` entries in \`src/codegen/schema-patches.ts\` and remove any workarounds that compensate for the now-fixed behaviour.
+Bug(s) **${fixedBugIds.join(", ")}** are no longer reproducible against the live API. Review the relevant patches in \`src/codegen/\` and remove workarounds that compensate for the now-fixed behaviour.
 
 ${bugTable}`);
 } else {

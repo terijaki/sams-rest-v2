@@ -2,7 +2,7 @@ import { describe, expect, it } from "vite-plus/test";
 import { operationPatches } from "./operation-patches";
 
 describe("operationPatches", () => {
-  it("patches GET /event-types response to an array (bug #12)", () => {
+  it("patches GET /event-types response to an array (event-types-array-response)", () => {
     const operation = {
       responses: {
         "200": {
