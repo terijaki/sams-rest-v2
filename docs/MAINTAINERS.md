@@ -84,12 +84,12 @@ These are **separate** — configuring one does not configure the other.
 
 Job names use a `Category: detail` schema (e.g. `Test: unit`, `Release: version bump`).
 
-| Workflow           | Trigger                | Jobs                                                                                                                 | Purpose                                                                                                              |
-| ------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`           | PR                     | `Test: unit`, `Test: live API`                                                                                       | Unit: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; live: `vp test src/live` with `SAMS_API_KEY`        |
-| `version-bump.yml` | PR opened/updated      | `Release: version bump`                                                                                              | Patch-bump `package.json` on PR branch                                                                               |
-| `publish.yml`      | Merge to `main`        | `Test: verify`, `Release: publish`                                                                                   | Verify (unit + pack + live API) → `npm publish` (OIDC), git tag/release                                              |
-| `weekly.yml`       | Saturday cron / manual | `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify`            | Swagger drift, live bugs, regenerate/verify, drift PR, actionable notifications                                      |
+| Workflow           | Trigger                | Jobs                                                                                                      | Purpose                                                                                                       |
+| ------------------ | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`           | PR                     | `Test: unit`, `Test: live API`                                                                            | Unit: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; live: `vp test src/live` with `SAMS_API_KEY` |
+| `version-bump.yml` | PR opened/updated      | `Release: version bump`                                                                                   | Patch-bump `package.json` on PR branch                                                                        |
+| `publish.yml`      | Merge to `main`        | `Test: verify`, `Release: publish`                                                                        | Verify (unit + pack + live API) → `npm publish` (OIDC), git tag/release                                       |
+| `weekly.yml`       | Saturday cron / manual | `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify` | Swagger drift, live bugs, regenerate/verify, drift PR, actionable notifications                               |
 
 ### Weekly health check
 
