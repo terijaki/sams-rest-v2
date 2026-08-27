@@ -60,6 +60,7 @@ When asked to verify the package or an issue:
 ```bash
 vp install --frozen-lockfile
 vp test && vp check && vp pack
+vp pm audit -- --prod                 # shipped deps only; full audit may fail on dev tooling
 env -u SAMS_API_KEY vp run generate   # must not use API key
 vp run bugs                           # needs SAMS_API_KEY
 vp run smoke                          # needs SAMS_API_KEY; fails on HTTP 403

@@ -18,15 +18,16 @@ Cloud Agents bootstrap via `.cursor/environment.json` (installs `vp`, then `vp i
 
 ## Day-to-day commands
 
-| Command                | Purpose                                                   |
-| ---------------------- | --------------------------------------------------------- |
-| `vp check`             | Format, lint, and type-check                              |
-| `vp test`              | Unit tests (no live API, no key)                          |
-| `vp pack`              | Build library to `dist/`                                  |
-| `vp run generate`      | Regenerate client from upstream swagger                   |
-| `vp run bugs`          | Live upstream bug probes (needs `SAMS_API_KEY`)           |
-| `vp run smoke`         | Live `createSamsClient` smoke test (needs `SAMS_API_KEY`) |
-| `vp run swagger:drift` | Compare two `source.json` snapshots (CI helper)           |
+| Command                    | Purpose                                                   |
+| -------------------------- | --------------------------------------------------------- |
+| `vp check`                 | Format, lint, and type-check                              |
+| `vp test`                  | Unit tests (no live API, no key)                          |
+| `vp pack`                  | Build library to `dist/`                                  |
+| `vp pm audit -- --prod`    | Audit shipped dependencies (not dev tooling)              |
+| `vp run generate`          | Regenerate client from upstream swagger                   |
+| `vp run bugs`              | Live upstream bug probes (needs `SAMS_API_KEY`)           |
+| `vp run smoke`             | Live `createSamsClient` smoke test (needs `SAMS_API_KEY`) |
+| `vp run swagger:drift`     | Compare two `source.json` snapshots (CI helper)           |
 
 Use `vp run <script>` for `package.json` scripts. Use built-in `vp test`, `vp check`, `vp pack` directly — not `npm run` / `bun run`.
 
@@ -69,12 +70,12 @@ These are **separate** — configuring one does not configure the other.
 
 ## CI workflows
 
-| Workflow           | Trigger                | Purpose                                       |
-| ------------------ | ---------------------- | --------------------------------------------- |
-| `ci.yml`           | PR / push to `main`    | `vp check`, `vp test`, `vp pack`              |
-| `version-bump.yml` | PR opened/updated      | Patch-bump `package.json` on PR branch        |
-| `publish.yml`      | Merge to `main`        | Verify, `npm publish` (OIDC), git tag/release |
-| `weekly.yml`       | Saturday cron / manual | Swagger drift, live bugs, drift PR            |
+| Workflow           | Trigger                | Purpose                                                   |
+| ------------------ | ---------------------- | --------------------------------------------------------- |
+| `ci.yml`           | PR / push to `main`    | `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod` |
+| `version-bump.yml` | PR opened/updated      | Patch-bump `package.json` on PR branch                    |
+| `publish.yml`      | Merge to `main`        | Verify, `npm publish` (OIDC), git tag/release             |
+| `weekly.yml`       | Saturday cron / manual | Swagger drift, live bugs, drift PR                        |
 
 ### Weekly health check
 

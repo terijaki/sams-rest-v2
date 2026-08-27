@@ -28,3 +28,6 @@ jobs:
 
       - name: Pack
         run: vp pack
+
+      - name: Audit production dependencies
+        run: vp pm audit -- --prod
