@@ -1,5 +1,7 @@
 # SAMS REST v2 client (`sams-rest-v2`)
 
+Generated client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle). OpenAPI is fetched from `https://www.volleyball-baden.de/api/v2/swagger.json`.
+
 Requires Node.js **22.18+** (`@hey-api/openapi-ts` 0.99).
 
 ## Install
@@ -35,7 +37,7 @@ const { data } = await getAllSeasons({ client });
 
 ## Codegen
 
-Regenerate from the **public** swagger document. Do not pass `SAMS_API_KEY` to this step.
+Regenerate from the **public** swagger document ([API docs](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle)). Do not pass `SAMS_API_KEY` to this step.
 
 ```bash
 npm run generate
