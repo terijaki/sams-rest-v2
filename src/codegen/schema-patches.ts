@@ -215,7 +215,12 @@ export const schemaPatches: Record<string, SchemaPatch> = {
   },
   CompetitionDto: (schema) => {
     if (!schema.properties) return;
+    schema.properties._embedded = {
+      type: "object",
+      additionalProperties: true,
+    };
     for (const [key, property] of Object.entries(schema.properties)) {
+      if (key === "_embedded") continue;
       const value = asSchemaProperty(property);
       if (!value) continue;
       switch (key) {
@@ -235,7 +240,12 @@ export const schemaPatches: Record<string, SchemaPatch> = {
   },
   SuperCompetitionDto: (schema) => {
     if (!schema.properties) return;
+    schema.properties._embedded = {
+      type: "object",
+      additionalProperties: true,
+    };
     for (const [key, property] of Object.entries(schema.properties)) {
+      if (key === "_embedded") continue;
       const value = asSchemaProperty(property);
       if (!value) continue;
       switch (key) {

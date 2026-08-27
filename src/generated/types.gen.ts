@@ -277,10 +277,8 @@ export type CompetitionDto = {
         [key: string]: LinkDto;
     } | null;
     _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+        [key: string]: unknown;
+    };
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -377,10 +375,8 @@ export type SuperCompetitionDto = {
         [key: string]: LinkDto;
     } | null;
     _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+        [key: string]: unknown;
+    };
     attributes?: {
         [key: string]: JsonNode;
     } | null;

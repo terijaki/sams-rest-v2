@@ -5216,10 +5216,7 @@
           },
           "_embedded": {
             "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
-            "nullable": true
+            "additionalProperties": true
           },
           "attributes": {
             "type": "object",
@@ -5469,10 +5466,7 @@
           },
           "_embedded": {
             "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
-            "nullable": true
+            "additionalProperties": true
           },
           "attributes": {
             "type": "object",

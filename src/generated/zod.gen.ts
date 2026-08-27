@@ -268,7 +268,7 @@ export const zCompetitionDto = z.object({
         description: 'Entity unique identifier'
     }).optional(),
     _links: z.record(z.string(), zLinkDto).nullish(),
-    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).nullish(),
+    _embedded: z.record(z.string(), z.unknown()).optional(),
     attributes: z.record(z.string(), zJsonNode).nullish(),
     name: z.string().nullish(),
     shortName: z.string().nullish(),
@@ -339,7 +339,7 @@ export const zSuperCompetitionDto = z.object({
         description: 'Entity unique identifier'
     }).optional(),
     _links: z.record(z.string(), zLinkDto).nullish(),
-    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).nullish(),
+    _embedded: z.record(z.string(), z.unknown()).optional(),
     attributes: z.record(z.string(), zJsonNode).nullish(),
     name: z.string().nullish(),
     shortName: z.string().nullish(),
