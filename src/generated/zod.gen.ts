@@ -575,14 +575,14 @@ export const zLeagueMatchDayDto = z.object({
     uuid: z.string().register(z.globalRegistry, {
         description: 'Entity unique identifier'
     }).optional(),
-    _links: z.record(z.string(), zLinkDto).optional(),
-    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
-    attributes: z.record(z.string(), zJsonNode).optional(),
-    name: z.string().optional(),
-    matchdate: z.iso.datetime({ offset: true, local: true }).optional(),
-    seasonUuid: z.string().optional(),
-    leagueUuid: z.string().optional(),
-    associationUuid: z.string().optional()
+    _links: z.record(z.string(), zLinkDto).nullish(),
+    _embedded: z.record(z.string(), z.record(z.string(), z.unknown())).nullish(),
+    attributes: z.record(z.string(), zJsonNode).nullish(),
+    name: z.string().nullish(),
+    matchdate: z.iso.date().nullish(),
+    seasonUuid: z.string().nullish(),
+    leagueUuid: z.string().nullish(),
+    associationUuid: z.string().nullish()
 });
 
 export const zLeagueMatchDayPage = z.object({
@@ -1625,7 +1625,9 @@ export const zGetEventTypesQuery = z.object({
 /**
  * Successful operation
  */
-export const zGetEventTypesResponse = zEventType;
+export const zGetEventTypesResponse = z.array(zEventType).register(z.globalRegistry, {
+    description: 'Successful operation'
+});
 
 export const zGenerateAccessCodeForMatchHeaders = z.object({
     'X-Api-Key': z.string().register(z.globalRegistry, {

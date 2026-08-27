@@ -87,6 +87,28 @@ function patchMatchDto(schema: SchemaObject): void {
   }
 }
 
+function patchMatchDayDto(schema: SchemaObject): void {
+  if (!schema.properties) return;
+  const matchdate = asSchemaProperty(schema.properties.matchdate);
+  if (matchdate) {
+    // Bug #11 (discovered 2026-08-27): same date-only quirk as match `date` (bug #6).
+    matchdate.format = "date";
+    matchdate.nullable = true;
+  }
+  for (const [key, property] of Object.entries(schema.properties)) {
+    if (key === "matchdate") continue;
+    const value = asSchemaProperty(property);
+    if (!value) continue;
+    switch (key) {
+      case "uuid":
+        value.nullable = false;
+        break;
+      default:
+        value.nullable = true;
+    }
+  }
+}
+
 /**
  * Named schema patches consumed by @hey-api/openapi-ts `parser.patch.schemas`.
  * Keep keys identical to upstream component schema names.
@@ -99,6 +121,9 @@ export const schemaPatches: Record<string, SchemaPatch> = {
   // NOTE: hey-api drops nullable on bare $ref — wrap in `{ allOf: [property], nullable: true }`.
   CompetitionMatchDto: patchMatchDto,
   LeagueMatchDto: patchMatchDto,
+  // Bug #11 (discovered 2026-08-27, PR #11 live CI `getMatchDaysForLeague`): `matchdate` is
+  // format date-time in spec but API returns YYYY-MM-DD (same class of defect as bug #6).
+  LeagueMatchDayDto: patchMatchDayDto,
   RefereeTeamDto: markAllPropertiesNullable,
   Location: markAllPropertiesNullable,
   VolleyballMatchResultsDto: markAllPropertiesNullable,

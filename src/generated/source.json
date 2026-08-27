@@ -3653,7 +3653,10 @@
             "content": {
               "application/hal+json; charset=UTF-8": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventType"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventType"
+                  }
                 }
               }
             }
@@ -6462,41 +6465,50 @@
         "properties": {
           "uuid": {
             "type": "string",
-            "description": "Entity unique identifier"
+            "description": "Entity unique identifier",
+            "nullable": false
           },
           "_links": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/LinkDto"
-            }
+            },
+            "nullable": true
           },
           "_embedded": {
             "type": "object",
             "additionalProperties": {
               "type": "object"
-            }
+            },
+            "nullable": true
           },
           "attributes": {
             "type": "object",
             "additionalProperties": {
               "$ref": "#/components/schemas/JsonNode"
-            }
+            },
+            "nullable": true
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "matchdate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date",
+            "nullable": true
           },
           "seasonUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "leagueUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "associationUuid": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         }
       },

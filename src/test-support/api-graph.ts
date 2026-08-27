@@ -17,6 +17,10 @@ function firstUuid(items: UuidCarrier[] | undefined, label: string): string {
   return uuid;
 }
 
+function firstOptionalUuid(items: UuidCarrier[] | undefined): string | undefined {
+  return items?.find((item) => item.uuid)?.uuid;
+}
+
 function firstFromPage<T extends UuidCarrier>(
   page: { content?: T[] } | T[] | undefined,
   label: string,
@@ -196,7 +200,7 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
   ]);
 
   await sams.getAssociationByUuid({ path: { uuid: associationUuid } });
-  await sams.getCommitteesForAssociation({
+  const { data: committeesForAssociation } = await sams.getCommitteesForAssociation({
     path: { uuid: associationUuid },
     query: { size: PAGE_SIZE },
   });
@@ -205,28 +209,20 @@ export async function walkSamsApiGraph(sams: SamsClient): Promise<void> {
     query: { size: PAGE_SIZE },
   });
 
-  const committeeUuid = await firstUuidFromCalls("committee", [
-    () => sams.getAllCommittees({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
-  ]);
-  await sams.getCommittee({ path: { uuid: committeeUuid } });
+  const committeeUuid = firstOptionalUuid(pageItems(committeesForAssociation));
+  if (committeeUuid) {
+    await sams.getCommittee({ path: { uuid: committeeUuid } });
+  }
 
   const locationUuid = await firstUuidFromCalls("location", [
     () => sams.getAllLocations({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
   ]);
   await sams.getLocationByUuid({ path: { uuid: locationUuid } });
 
-  const eventUuid = await firstUuidFromCalls("event", [
-    () => sams.getAllEvents({ query: { size: PAGE_SIZE } }).then(({ data }) => data),
-  ]);
-  await sams.getEventByUuid({ path: { uuid: eventUuid } });
-
   const { data: eventTypes } = await sams.getEventTypes();
-  const eventTypeUuid =
-    eventTypes && typeof eventTypes === "object" && "uuid" in eventTypes && eventTypes.uuid
-      ? eventTypes.uuid
-      : firstFromPage(
-          Array.isArray(eventTypes) ? eventTypes : [eventTypes as UuidCarrier],
-          "event type",
-        );
+  const eventTypeUuid = firstFromPage(
+    Array.isArray(eventTypes) ? eventTypes : [eventTypes as UuidCarrier],
+    "event type",
+  );
   await sams.getEventTypeByUuid({ path: { uuid: eventTypeUuid } });
 }

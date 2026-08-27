@@ -45,9 +45,11 @@ const bugDescriptions: Record<number, string> = {
   8: "`LeagueHierarchyDto.parentLeagueHierarchyUuid` declared non-null but API returns `null`",
   9: "Competition/League/SuperCompetition unset fields return `null` but spec omits `nullable: true`",
   10: "`SuperCompetitionDto._embedded.sub_competitions` is an array but spec models embedded values as objects",
+  11: "`LeagueMatchDayDto.matchdate` declared as `date-time` but API returns a date-only string (`YYYY-MM-DD`)",
+  12: "`GET /event-types` returns an array but spec declares a single `EventType` object",
 };
 
-const allBugIds = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+const allBugIds = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const fixedSet = new Set(fixedBugIds);
 const failedSet = new Set(checkFailedIds);
 const rows = allBugIds.map((id) => {

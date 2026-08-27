@@ -20,6 +20,8 @@ All issues are upstream API defects, unless noted otherwise.
 | 8   | `GET /league-hierarchies`                                             | Medium   | `parentLeagueHierarchyUuid` is documented as non-null string but API returns `null` for root hierarchy nodes                    |
 | 9   | `GET /competitions`, `GET /leagues/{uuid}`, `GET /super-competitions` | Medium   | `superCompetitionUuid`, `latestResultUpdate`, `latestStructuralUpdate` return `null` when unset but spec omits `nullable: true` |
 | 10  | `GET /super-competitions`                                             | Medium   | `_embedded.sub_competitions` is a JSON array but spec models `_embedded` values as objects (record), breaking strict validators |
+| 11  | `GET /leagues/{uuid}/match-days`, `GET /match-days`                   | Low      | `matchdate` declared as `format: date-time` but API returns a date-only string (`YYYY-MM-DD`)                                   |
+| 12  | `GET /event-types`                                                    | Medium   | Returns a JSON array of event types but spec declares a single `EventType` object                                               |
 
 ---
 
@@ -179,3 +181,35 @@ Note that the `time` is a separate string field (`HH:mm`), confirming the intent
 
 **Impact:** Code generators emit `z.record(…, z.object(…))` for `_embedded`, which rejects array payloads (`expected record, received array`). Same HAL looseness applies to `CompetitionDto._embedded`.  
 **Workaround:** Replace `_embedded` with `{ type: "object", additionalProperties: true }` on `CompetitionDto` and `SuperCompetitionDto` in `src/codegen/schema-patches.ts`. Live probe: `vp run bugs` bug #10.
+
+---
+
+### Bug 11 — `matchdate` field declared as `date-time` but returns a date-only string
+
+**Endpoints:** `GET /leagues/{uuid}/match-days`, `GET /match-days`, `GET /match-days/{uuid}`  
+**Discovered:** 2026-08-27 (PR #11 live CI, `getMatchDaysForLeague` Zod failure)  
+**Spec (`LeagueMatchDayDto`):** `matchdate` is `type: string, format: date-time`.  
+**Actual:** The API returns a plain date string — `YYYY-MM-DD` — with no time component (same pattern as bug #6 on match `date`).
+
+```json
+{ "matchdate": "2025-10-04", "name": "1. Spieltag" }
+```
+
+**Impact:** Generated Zod validators reject valid match-day list responses (`Invalid ISO datetime`).  
+**Workaround:** Patch `LeagueMatchDayDto.matchdate` to `format: "date"` in `src/codegen/schema-patches.ts`. Live probe: `vp run bugs` bug #11.
+
+---
+
+### Bug 12 — `GET /event-types` returns an array, spec declares a single object
+
+**Endpoint:** `GET /event-types`  
+**Discovered:** 2026-08-27 (PR #11 live CI, `getEventTypes` Zod failure)  
+**Spec:** Response `200` schema is `$ref: EventType` (one object).  
+**Actual:** Returns a JSON array of event type objects.
+
+```json
+[{ "uuid": "…", "name": "VBL I Schiedsrichterseminare", "category": "Schiedsrichter" }]
+```
+
+**Impact:** Generated Zod validator rejects valid responses (`expected object, received array`).  
+**Workaround:** Patch operation `GET /event-types` response to `{ type: array, items: { $ref: EventType } }` in `src/codegen/operation-patches.ts`. Live probe: `vp run bugs` bug #12.

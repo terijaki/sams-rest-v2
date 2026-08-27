@@ -744,20 +744,20 @@ export type LeagueMatchDayDto = {
     uuid?: string;
     _links?: {
         [key: string]: LinkDto;
-    };
+    } | null;
     _embedded?: {
         [key: string]: {
             [key: string]: unknown;
         };
-    };
+    } | null;
     attributes?: {
         [key: string]: JsonNode;
-    };
-    name?: string;
-    matchdate?: string;
-    seasonUuid?: string;
-    leagueUuid?: string;
-    associationUuid?: string;
+    } | null;
+    name?: string | null;
+    matchdate?: string | null;
+    seasonUuid?: string | null;
+    leagueUuid?: string | null;
+    associationUuid?: string | null;
 };
 
 export type LeagueMatchDayPage = {
@@ -3161,7 +3161,7 @@ export type GetEventTypesResponses = {
     /**
      * Successful operation
      */
-    200: EventType;
+    200: Array<EventType>;
 };
 
 export type GetEventTypesResponse = GetEventTypesResponses[keyof GetEventTypesResponses];

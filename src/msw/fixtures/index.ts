@@ -150,7 +150,7 @@ export const fixtures = {
   matchDay: {
     uuid: ids.matchDay,
     name: "1. Spieltag",
-    matchdate: "2025-10-04T12:00:00+02:00",
+    matchdate: "2025-10-04",
     seasonUuid: ids.season,
     leagueUuid: ids.league,
     associationUuid: ids.association,
@@ -336,7 +336,7 @@ const validated = {
   location: zGetLocationByUuidResponse.parse(fixtures.location),
   allEvents: zGetAllEventsResponse.parse(page([fixtures.event])),
   event: zGetEventByUuidResponse.parse(fixtures.event),
-  eventTypes: zGetEventTypesResponse.parse(fixtures.eventType),
+  eventTypes: zGetEventTypesResponse.parse([fixtures.eventType]),
   eventType: zGetEventTypeByUuidResponse.parse(fixtures.eventType),
 };
 

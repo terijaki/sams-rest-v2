@@ -172,6 +172,23 @@ describe("schemaPatches", () => {
     expect(schema.properties.name.nullable).toBe(true);
   });
 
+  it("patches LeagueMatchDayDto matchdate format to date (bug #11)", () => {
+    const schema: PatchableSchema = {
+      properties: {
+        uuid: { type: "string" },
+        matchdate: { type: "string", format: "date-time" },
+        name: { type: "string" },
+      },
+    };
+
+    schemaPatches.LeagueMatchDayDto(schema);
+
+    expect(schema.properties.matchdate.format).toBe("date");
+    expect(schema.properties.matchdate.nullable).toBe(true);
+    expect(schema.properties.uuid.nullable).toBe(false);
+    expect(schema.properties.name.nullable).toBe(true);
+  });
+
   it("covers the same schema names as vcmuellheim generate-client.ts", () => {
     expect(Object.keys(schemaPatches).sort()).toEqual(
       [
@@ -181,6 +198,7 @@ describe("schemaPatches", () => {
         "CompetitionMatchDto",
         "LeagueDto",
         "LeagueHierarchyDto",
+        "LeagueMatchDayDto",
         "LeagueMatchDto",
         "LeagueRankingsEntryDto",
         "Location",

@@ -470,6 +470,109 @@ async function checkBug10(apiKey: string): Promise<BugResult> {
   }
 }
 
+// Bug #11 — LeagueMatchDayDto.matchdate declared as date-time but API returns date-only (discovered 2026-08-27)
+async function checkBug11(apiKey: string): Promise<BugResult> {
+  const id = 11;
+  const summary =
+    "`matchdate` field declared as `date-time` but API returns a date-only string (YYYY-MM-DD)";
+  try {
+    const spec = await fetchSwaggerSpec();
+    if (!spec) {
+      return { id, summary, status: "check_failed", detail: "Failed to fetch swagger.json" };
+    }
+
+    const matchdateSpec = schemaProperties(spec, "LeagueMatchDayDto")?.matchdate as
+      | { format?: string }
+      | undefined;
+    const specUsesDateTime = matchdateSpec?.format === "date-time";
+
+    const matchDaysRes = await samsGet(
+      `/leagues/${VERBANDSLIGA_HERREN_UUID}/match-days?size=5`,
+      apiKey,
+    );
+    if (!matchDaysRes.ok) {
+      return {
+        id,
+        summary,
+        status: "check_failed",
+        detail: `HTTP ${matchDaysRes.status} fetching match-days`,
+      };
+    }
+
+    const matchDaysData = (await matchDaysRes.json()) as {
+      content?: Array<{ matchdate?: string }>;
+    };
+    const matchdate = matchDaysData.content?.find((entry) => entry.matchdate)?.matchdate;
+    if (!matchdate) {
+      return { id, summary, status: "check_failed", detail: "No match-day with matchdate found" };
+    }
+
+    const apiReturnsDateOnly = !matchdate.includes("T");
+    const bugPresent = specUsesDateTime && apiReturnsDateOnly;
+    const detail = [
+      specUsesDateTime ? "spec still declares format: date-time" : null,
+      apiReturnsDateOnly ? "API returns date-only matchdate" : null,
+    ]
+      .filter(Boolean)
+      .join("; ");
+    return {
+      id,
+      summary,
+      status: bugPresent ? "still_present" : "fixed",
+      detail: detail || undefined,
+    };
+  } catch (e) {
+    return { id, summary, status: "check_failed", detail: String(e) };
+  }
+}
+
+// Bug #12 — GET /event-types returns array but spec declares single EventType (discovered 2026-08-27)
+async function checkBug12(apiKey: string): Promise<BugResult> {
+  const id = 12;
+  const summary = "`GET /event-types` returns an array but spec declares a single EventType object";
+  try {
+    const spec = await fetchSwaggerSpec();
+    if (!spec) {
+      return { id, summary, status: "check_failed", detail: "Failed to fetch swagger.json" };
+    }
+
+    const paths = spec.paths as Record<string, { get?: { responses?: Record<string, unknown> } }>;
+    const response200 = paths["/event-types"]?.get?.responses?.["200"] as
+      | { content?: Record<string, { schema?: { type?: string; $ref?: string } }> }
+      | undefined;
+    const schema = response200?.content?.["application/hal+json; charset=UTF-8"]?.schema;
+    const specDeclaresObject = Boolean(schema?.$ref) && schema?.type !== "array";
+
+    const eventTypesRes = await samsGet("/event-types", apiKey);
+    if (!eventTypesRes.ok) {
+      return {
+        id,
+        summary,
+        status: "check_failed",
+        detail: `HTTP ${eventTypesRes.status} fetching event-types`,
+      };
+    }
+
+    const eventTypes = (await eventTypesRes.json()) as unknown;
+    const apiReturnsArray = Array.isArray(eventTypes);
+    const bugPresent = specDeclaresObject && apiReturnsArray;
+    const detail = [
+      specDeclaresObject ? "spec still declares single EventType response" : null,
+      apiReturnsArray ? "API returns JSON array" : null,
+    ]
+      .filter(Boolean)
+      .join("; ");
+    return {
+      id,
+      summary,
+      status: bugPresent ? "still_present" : "fixed",
+      detail: detail || undefined,
+    };
+  } catch (e) {
+    return { id, summary, status: "check_failed", detail: String(e) };
+  }
+}
+
 async function main(): Promise<void> {
   const apiKey = process.env.SAMS_API_KEY;
   if (!apiKey) {
@@ -477,7 +580,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const [bug2, bug3, bug4, bug5, bug6, bug7, bug8, bug9, bug10] = await Promise.all([
+  const [bug2, bug3, bug4, bug5, bug6, bug7, bug8, bug9, bug10, bug11, bug12] = await Promise.all([
     checkBug2(apiKey),
     checkBug3(apiKey),
     checkBug4(),
@@ -487,10 +590,12 @@ async function main(): Promise<void> {
     checkBug8(apiKey),
     checkBug9(apiKey),
     checkBug10(apiKey),
+    checkBug11(apiKey),
+    checkBug12(apiKey),
   ]);
 
   const result: CheckResult = {
-    bugs: [bug2, bug3, bug4, bug5, bug6, bug7, bug8, bug9, bug10],
+    bugs: [bug2, bug3, bug4, bug5, bug6, bug7, bug8, bug9, bug10, bug11, bug12],
     checkedAt: new Date().toISOString(),
   };
 
