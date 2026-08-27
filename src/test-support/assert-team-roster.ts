@@ -10,8 +10,8 @@ function assertRosterMember(member: TeamPlayerDto | TeamOfficialDto, label: stri
 }
 
 /**
- * Validates roster arrays and member identity fields consumers rely on
- * (vcmuellheim / markgraefler-volleys roster sync and display).
+ * Validates roster arrays and member identity fields typical club-site
+ * integrations rely on for roster sync and display.
  */
 export function assertTeamRosterStructure(roster: TeamRosterDto): void {
   if (roster.players !== undefined && !Array.isArray(roster.players)) {

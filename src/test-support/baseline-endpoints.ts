@@ -1,14 +1,13 @@
 import type { SamsClient } from "../create-sams-client";
 
 /**
- * SAMS SDK operations used by terijaki/vcmuellheim and terijaki/markgraefler-volleys.
+ * Baseline SAMS SDK operations for a typical club-site integration:
+ * seasons, leagues, teams, rosters, rankings, matches, associations, and sportsclubs.
  *
- * Sources (2026-08): teams sync lambda, clubs sync lambda, match loader, rankings,
- * and server functions that read synced DynamoDB data originally populated via these calls.
- *
- * Update this list when consumer apps add or remove SAMS dependencies.
+ * The API graph test suite must exercise each of these. Extend the list when a
+ * supported integration pattern needs additional operations.
  */
-export const CONSUMER_SAMS_OPERATIONS = [
+export const BASELINE_SAMS_OPERATIONS = [
   "getAllSeasons",
   "getSeasonByUuid",
   "getAllLeagueHierarchies",
