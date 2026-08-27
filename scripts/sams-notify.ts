@@ -63,10 +63,12 @@ const titleParts: string[] = [];
 if (hasDrift) {
   titleParts.push("⚠️ swagger drift");
   sections.push(
-    buildSwaggerDriftSection({
+    `${buildSwaggerDriftSection({
       runUrl,
       summaryMarkdown: driftSummaryMarkdown,
-    }),
+    })}
+
+The regenerated client was committed to \`main\` when verification passed. The [\`publish.yml\`](${runUrl.replace(/\/runs\/\d+$/, "")}/blob/main/.github/workflows/publish.yml) workflow will patch-bump and publish on that push.`,
   );
 }
 
