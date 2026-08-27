@@ -24,8 +24,6 @@ const date = new Date().toISOString().split("T")[0];
 
 const hasDrift = process.env.HAS_DRIFT === "true";
 const hasFixed = process.env.HAS_FIXED === "true";
-const published = process.env.PUBLISHED === "true";
-const publishedVersion = process.env.PUBLISHED_VERSION ?? "";
 const fixedBugIds = (process.env.FIXED_BUG_IDS ?? "").split(",").filter(Boolean).map(Number);
 const checkFailedIds = (process.env.CHECK_FAILED_IDS ?? "").split(",").filter(Boolean).map(Number);
 const regenFailed = process.env.REGEN_FAILED === "true";
@@ -33,7 +31,7 @@ const failureStep = process.env.FAILURE_STEP ?? "";
 const swaggerJobFailed = process.env.SWAGGER_DRIFT_RESULT === "failure";
 const bugCheckJobFailed = process.env.BUG_CHECK_RESULT === "failure";
 const regenJobFailed = process.env.REGENERATE_RESULT === "failure";
-const publishJobFailed = process.env.PUBLISH_RESULT === "failure";
+const commitDriftJobFailed = process.env.COMMIT_DRIFT_RESULT === "failure";
 const driftSummaryMarkdown = process.env.DRIFT_SUMMARY_MARKDOWN ?? "";
 
 const bugDescriptions: Record<number, string> = {
@@ -72,13 +70,6 @@ if (hasDrift) {
   );
 }
 
-if (published) {
-  titleParts.push("📦 published");
-  sections.push(`## 📦 Published \`${publishedVersion}\`
-
-Semantic swagger drift was detected, the client was regenerated, and \`sams-rest-v2@${publishedVersion}\` was published to npm.`);
-}
-
 if (hasFixed) {
   titleParts.push("✅ bugs fixed");
   sections.push(`## ✅ Upstream Bug(s) Fixed
@@ -113,10 +104,10 @@ if (bugCheckJobFailed) {
   );
 }
 
-if (publishJobFailed) {
-  titleParts.push("❌ publish failed");
+if (commitDriftJobFailed) {
+  titleParts.push("❌ drift commit failed");
   sections.push(
-    `## ❌ Publish Job Failed\n\nSemantic drift was detected but npm publish did not succeed. Confirm that \`NPM_TOKEN\` is set as a repository secret.\n\n[View run](${runUrl})`,
+    `## ❌ Drift Commit Failed\n\nSemantic drift was detected and verification passed, but pushing the regenerated client to \`main\` failed.\n\n[View run](${runUrl})`,
   );
 }
 

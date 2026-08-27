@@ -1,0 +1,45 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish-main
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Bump version and publish to npm
+    runs-on: ubuntu-latest
+    # Avoid an infinite loop: this job pushes `chore(release): …` commits.
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "25"
+          registry-url: https://registry.npmjs.org
+
+      - name: Verify
+        run: vp check && vp test && vp pack
+
+      - name: Bump patch version, publish, and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          npm version patch -m "chore(release): %s"
+          npm publish --access public --provenance
+          git push origin HEAD --follow-tags

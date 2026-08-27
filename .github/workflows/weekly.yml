@@ -48,6 +48,45 @@ jobs:
           path: src/generated
           include-hidden-files: true
 
+  commit-drift:
+    name: Commit swagger drift to main
+    needs: [swagger-drift, regenerate]
+    if: |
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      needs.swagger-drift.outputs.has_drift == 'true' &&
+      needs.regenerate.outputs.failed == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Restore regenerated client
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-client
+          path: src/generated
+
+      - name: Commit and push regenerated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/generated
+          if git diff --cached --quiet; then
+            echo "No generated-file changes after artifact restore."
+            exit 0
+          fi
+          git commit -m "fix: regenerate SAMS client from upstream swagger"
+          git push origin HEAD
+
   bug-check:
     name: Check Known API Bugs
     runs-on: ubuntu-latest
@@ -163,66 +202,9 @@ jobs:
             echo "failure_step=" >> "$GITHUB_OUTPUT"
           fi
 
-  publish:
-    name: Publish on real swagger change
-    needs: [swagger-drift, bug-check, regenerate]
-    if: |
-      always() &&
-      github.ref == 'refs/heads/main' &&
-      needs.swagger-drift.outputs.has_drift == 'true' &&
-      needs.regenerate.outputs.failed == 'false'
-    runs-on: ubuntu-latest
-    outputs:
-      published: ${{ steps.release.outputs.published }}
-      version: ${{ steps.release.outputs.version }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: voidzero-dev/setup-vp@v1
-        with:
-          node-version: "25"
-          cache: true
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25"
-          registry-url: https://registry.npmjs.org
-
-      - name: Restore regenerated client
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-client
-          path: src/generated
-
-      - name: Verify restored client
-        run: vp test && vp pack
-
-      - name: Commit regenerated client, bump, and publish
-        id: release
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/generated
-          if git diff --cached --quiet; then
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            echo "No generated-file changes after artifact restore."
-            exit 0
-          fi
-          git commit -m "fix: regenerate SAMS client from upstream swagger"
-          npm version patch -m "chore(release): %s"
-          VERSION=$(node -p "require('./package.json').version")
-          npm publish --access public
-          git push origin HEAD --follow-tags
-          echo "published=true" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
   notify:
     name: Create Issue if Actionable
-    needs: [swagger-drift, bug-check, regenerate, publish]
+    needs: [swagger-drift, bug-check, regenerate, commit-drift]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -241,7 +223,7 @@ jobs:
           needs.swagger-drift.result == 'failure' ||
           needs.bug-check.result == 'failure' ||
           needs.regenerate.result == 'failure' ||
-          needs.publish.result == 'failure'
+          needs.commit-drift.result == 'failure'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HAS_DRIFT: ${{ needs.swagger-drift.outputs.has_drift }}
@@ -254,7 +236,5 @@ jobs:
           SWAGGER_DRIFT_RESULT: ${{ needs.swagger-drift.result }}
           BUG_CHECK_RESULT: ${{ needs.bug-check.result }}
           REGENERATE_RESULT: ${{ needs.regenerate.result }}
-          PUBLISH_RESULT: ${{ needs.publish.result }}
-          PUBLISHED: ${{ needs.publish.outputs.published }}
-          PUBLISHED_VERSION: ${{ needs.publish.outputs.version }}
+          COMMIT_DRIFT_RESULT: ${{ needs.commit-drift.result }}
         run: bun scripts/sams-notify.ts

@@ -73,18 +73,37 @@ SAMS_API_KEY=… bun run bugs
 
 Use the key only for this command (and the weekly CI job). Never print, log, commit, or put it in fixtures.
 
+## Publishing
+
+Every push to `main` (except release commits tagged `chore(release): …`) runs `.github/workflows/publish.yml`:
+
+1. `vp check`, `vp test`, `vp pack`
+2. `npm version patch`
+3. `npm publish --access public --provenance`
+4. Push the version bump and git tag to `main`
+
+Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC from GitHub Actions). No long-lived `NPM_TOKEN` is stored in the repo.
+
+**One-time setup** on [npmjs.com](https://www.npmjs.com/):
+
+1. Create the `sams-rest-v2` package (or run the first publish manually once).
+2. Package → **Trusted Publisher** → GitHub Actions:
+   - Organization/user: `terijaki`
+   - Repository: `sams-rest-v2`
+   - Workflow filename: `publish.yml`
+3. Ensure workflow permissions allow `id-token: write` (already set in `publish.yml`).
+
 ## Weekly CI
 
 `.github/workflows/weekly.yml` runs every Saturday:
 
 1. **Swagger drift** — regenerate from the public spec (no key) and compare `src/generated/source.json` semantically (key order ignored).
-2. **Live bug probes** — `SAMS_API_KEY` repository secret.
-3. **Publish** — if there is real spec drift and verification passed, commit the regenerated client, patch-bump, and `npm publish`.
+2. **Live bug probes** — uses the `SAMS_API_KEY` repository secret.
+3. **Auto-commit drift** — if upstream changed and verification passed, push regenerated `src/generated` to `main` (the publish workflow then releases a new patch version).
 
-Repository secrets:
+Repository secret:
 
 - `SAMS_API_KEY` — live probes only
-- `NPM_TOKEN` — publish on real swagger change
 
 ## Out of scope
 
