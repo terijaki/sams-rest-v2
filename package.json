@@ -46,6 +46,7 @@
     "pack": "vp pack",
     "generate": "bun ./scripts/generate-client.ts",
     "test": "vp test",
+    "test:api": "SAMS_LIVE=1 vp test src/live",
     "check": "vp check",
     "check:fix": "vp check --fix",
     "bugs": "bun ./scripts/check-sams-bugs.ts",
@@ -59,6 +60,7 @@
     "@hey-api/openapi-ts": "0.99.0",
     "@types/node": "^22.18.0",
     "@voidzero-dev/vite-plus-core": "0.3.0",
+    "msw": "^2.15.0",
     "typescript": "^6.0.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
     "vite-plus": "0.3.0"

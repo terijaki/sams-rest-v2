@@ -51,7 +51,24 @@ vp run generate
 vp test
 ```
 
-Unit tests cover client headers, schema patches, generated Zod fixtures, and semantic swagger drift. They do not call the live API and do not need a key.
+Unit tests cover client headers, schema patches, generated Zod fixtures, semantic swagger drift, and an MSW contract suite that exercises `createSamsClient` through native `fetch` (no key). They do not call the live API.
+
+Live API tests run after local tests and require a key:
+
+```bash
+SAMS_API_KEY=… bun run test:api
+```
+
+Never print, log, commit, or put the key in fixtures or codegen.
+
+### CI
+
+Pull requests and pushes to `main` run two required jobs:
+
+1. **Check, test & pack** — `vp check`, `vp test` (units + MSW), and `vp pack` without a key.
+2. **Live SAMS API** — `bun run test:api` with the `SAMS_API_KEY` repository secret after the unit job succeeds.
+
+Configure both jobs as required checks under **Settings → Branches** for `main`.
 
 ## Build
 

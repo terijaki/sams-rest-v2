@@ -32,6 +32,11 @@ jobs:
       - name: Verify
         run: vp check && vp test && vp pack
 
+      - name: Live API tests
+        env:
+          SAMS_API_KEY: ${{ secrets.SAMS_API_KEY }}
+        run: bun run test:api
+
       - name: Publish
         run: npm publish --access public --provenance
 
