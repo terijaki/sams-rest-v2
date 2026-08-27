@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Test: verify
+    name: "Test: verify"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -38,7 +38,7 @@ jobs:
         run: vp run test:api
 
   publish:
-    name: Release: publish
+    name: "Release: publish"
     needs: verify
     runs-on: ubuntu-latest
     permissions:
