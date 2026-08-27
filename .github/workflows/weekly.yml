@@ -18,7 +18,7 @@ jobs:
       has_drift: ${{ steps.diff.outputs.has_drift }}
       drift_summary_markdown: ${{ steps.diff.outputs.drift_summary_markdown }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: voidzero-dev/setup-vp@v1
         with:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Upload regenerated client
         if: steps.diff.outputs.has_drift == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: generated-client
           path: src/generated
@@ -62,7 +62,7 @@ jobs:
     outputs:
       pr_url: ${{ steps.pr.outputs.pr_url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -72,7 +72,7 @@ jobs:
           cache: true
 
       - name: Restore regenerated client
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: generated-client
           path: src/generated
@@ -113,7 +113,7 @@ jobs:
       fixed_bug_ids: ${{ steps.parse.outputs.fixed_bug_ids }}
       check_failed_ids: ${{ steps.parse.outputs.check_failed_ids }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: voidzero-dev/setup-vp@v1
         with:
@@ -172,7 +172,7 @@ jobs:
       failed: ${{ steps.result.outputs.failed }}
       failure_step: ${{ steps.result.outputs.failure_step }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: voidzero-dev/setup-vp@v1
         with:
@@ -226,7 +226,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: voidzero-dev/setup-vp@v1
         with:
