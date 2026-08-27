@@ -1,0 +1,8 @@
+.temp
+node_modules/
+.DS_Store
+*.pem
+.env
+.env.local
+**/.last-run.json
+**/test-results/
