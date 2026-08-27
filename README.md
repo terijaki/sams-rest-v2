@@ -1,8 +1,8 @@
 # SAMS REST v2 client (`sams-rest-v2`)
 
-Generated client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle). OpenAPI is fetched from `https://www.volleyball-baden.de/api/v2/swagger.json`.
+TypeScript client for the [SAMS REST API v2](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle) — generated fetch SDK, types, and Zod schemas.
 
-Requires Node.js **22.18+** (`@hey-api/openapi-ts` 0.99) and TypeScript **6.x** (7.x breaks codegen until hey-api catches up).
+**Requirements:** Node.js **22.18+**. TypeScript **6.x** for type-checking (7.x is not yet supported by the codegen toolchain).
 
 ## Install
 
@@ -10,7 +10,7 @@ Requires Node.js **22.18+** (`@hey-api/openapi-ts` 0.99) and TypeScript **6.x** 
 npm install sams-rest-v2
 ```
 
-## Usage
+## Quick start
 
 ```ts
 import { createSamsClient } from "sams-rest-v2";
@@ -24,93 +24,42 @@ const { data: seasons } = await sams.getAllSeasons();
 const { data: team } = await sams.getTeamByUuid({ path: { uuid } });
 ```
 
-`createSamsClient` always sends `Accept: */*` and `X-API-Key`. The API serves `application/hal+json`; `Accept: application/json` returns HTTP 406.
+`createSamsClient` always sends `Accept: */*` and `X-API-Key` on every request.
 
-SDK functions, types, and Zod schemas are also re-exported from the package root:
+## API notes
+
+- **Authentication:** Most endpoints require a valid `X-API-Key`. A few public endpoints (e.g. `/seasons`) work without one, but the client still sends the key when configured.
+- **Content type:** Responses are `application/hal+json`. Sending `Accept: application/json` returns HTTP **406** — use `Accept: */*` (the default with `createSamsClient`).
+- **Errors:** SDK methods return `{ data, error, response }` unless `throwOnError` is enabled on the underlying client.
+
+## Advanced usage
+
+Use the low-level SDK functions with an explicit client when you need more control:
 
 ```ts
 import { createSamsClient, getAllSeasons, zTeamDto } from "sams-rest-v2";
 
-const client = createSamsClient({ baseUrl, apiKey }).client;
+const { client } = createSamsClient({ baseUrl, apiKey });
 const { data } = await getAllSeasons({ client });
+
+// Zod schemas for runtime validation
+const parsed = zTeamDto.parse(data);
 ```
 
-## Codegen
+Constants are exported for convenience:
 
-Regenerate from the **public** swagger document ([API docs](https://wiki.sams-server.de/wiki/REST-API-Schnittstelle)). Do not pass `SAMS_API_KEY` to this step.
-
-```bash
-vp run generate
+```ts
+import { SAMS_DEFAULT_BASE_URL, SAMS_SWAGGER_URL } from "sams-rest-v2";
 ```
 
-`@hey-api/openapi-ts` is pinned at **0.99.0**. Schema patches live in `src/codegen/schema-patches.ts` (lifted from vcmuellheim `parser.patch.schemas`).
+## Known upstream quirks
 
-## Tests
-
-```bash
-vp test
-```
-
-Unit tests cover client headers, schema patches, generated Zod fixtures, and semantic swagger drift. They do not call the live API and do not need a key.
-
-## Build
-
-Package the library for npm with [Vite+ pack](https://viteplus.dev/guide/pack):
-
-```bash
-vp pack
-```
-
-Development uses [Vite+](https://viteplus.dev/) (`vp`). It resolves the configured package manager (`packageManager: bun@1.3.14`) and Node.js **22.18+**.
-
-```bash
-vp install
-vp check
-vp test
-vp pack
-```
-
-## Live bug probes
-
-Known upstream bugs are re-checked against the real API:
-
-```bash
-SAMS_API_KEY=… vp run bugs
-SAMS_API_KEY=… vp run smoke
-```
-
-Use the key only for this command (and the weekly CI job). Never print, log, commit, or put it in fixtures.
-
-## Publishing
-
-`main` is protected: changes land only via reviewed pull requests. Nothing in CI pushes commits to `main`.
-
-1. **Version bump** — `.github/workflows/version-bump.yml` patch-bumps `package.json` on the PR branch when it still matches `main` (one bump per PR).
-2. **Publish** — after a PR is merged, `.github/workflows/publish.yml` runs `vp check`, `vp test`, `vp pack`, `npm publish --access public --provenance`, and creates a `v*` git tag/release. It does not commit back to `main`.
-
-Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC from GitHub Actions). No long-lived `NPM_TOKEN` is stored in the repo.
-
-**One-time setup** on [npmjs.com](https://www.npmjs.com/):
-
-1. Create the `sams-rest-v2` package (or run the first publish manually once).
-2. Package → **Trusted Publisher** → GitHub Actions:
-   - Organization/user: `terijaki`
-   - Repository: `sams-rest-v2`
-   - Workflow filename: `publish.yml`
-3. Ensure workflow permissions allow `id-token: write` (already set in `publish.yml`).
-
-## Weekly CI
-
-`.github/workflows/weekly.yml` runs every Saturday:
-
-1. **Swagger drift** — regenerate from the public spec (no key) and compare `src/generated/source.json` semantically (key order ignored).
-2. **Live bug probes** — uses the `SAMS_API_KEY` repository secret.
-3. **Drift PR** — if upstream changed and verification passed, open or update a `sams-swagger-drift` pull request for maintainer review (merge triggers version bump + publish like any other PR).
-
-Repository secret:
-
-- `SAMS_API_KEY` — live probes only
+The remote API has documented defects and spec mismatches. See [docs/BUGS.md](docs/BUGS.md) for verified findings (missing associations, nullable fields, date formats, etc.).
 
 ## Out of scope
 
-Club lists, DynamoDB, logos, match cache, and app `project.config`.
+This package is a generated API client only. It does not include club lists, DynamoDB integration, logo handling, match caching, or application-specific configuration.
+
+## Contributing
+
+Maintainer workflow, codegen, CI, and publishing: [docs/MAINTAINERS.md](docs/MAINTAINERS.md).
