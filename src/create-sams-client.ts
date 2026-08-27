@@ -27,10 +27,6 @@ type BoundSdk = {
 
 export type SamsClient = BoundSdk & { client: Client };
 
-function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.replace(/\/+$/, "");
-}
-
 function mergeAlwaysSamsHeaders(apiKey: string, extra?: HeadersInit): Record<string, string> {
   const headers: Record<string, string> = {};
   if (extra instanceof Headers) {
@@ -71,7 +67,7 @@ export function createSamsClient(options: CreateSamsClientOptions): SamsClient {
 
   const client = createClient({
     ...rest,
-    baseUrl: normalizeBaseUrl(baseUrl),
+    baseUrl,
     headers: mergeAlwaysSamsHeaders(apiKey, extraHeaders),
   });
 
