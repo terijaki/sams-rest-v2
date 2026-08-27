@@ -84,6 +84,55 @@ These are **separate** — configuring one does not configure the other.
 3. **Regenerate & verify** — `vp run generate`, `vp check`, `vp test`, `vp pack`
 4. **Drift PR** — opens `sams-swagger-drift` branch when upstream changed
 
+## Dependabot
+
+Configured in [`.github/dependabot.yml`](../.github/dependabot.yml). Version updates are low-frequency; security updates are immediate.
+
+### Schedule
+
+| Ecosystem        | Version updates             | Security updates    |
+| ---------------- | --------------------------- | ------------------- |
+| `bun`            | Monthly (1st, 06:00 UTC)    | Immediate (grouped) |
+| `github-actions` | Quarterly (Jan/Apr/Jul/Oct) | Immediate (grouped) |
+
+Expected volume: ≤3 bun version PRs/month, ≤1 actions version PR/quarter, plus grouped security PRs when advisories appear.
+
+### Version-update groups (bun)
+
+| Group                 | What it covers                             |
+| --------------------- | ------------------------------------------ |
+| `production`          | Shipped deps (`zod`) — patch/minor         |
+| `dev-toolchain-patch` | Vite+, TypeScript, `@types/node` — patches |
+| `dev-toolchain-minor` | Same toolchain — minors                    |
+| `dev-other`           | Remaining dev deps — patch/minor           |
+
+Ignored for version updates: `@hey-api/openapi-ts` (pinned at 0.99.0), `typescript` majors (TS 7 breaks codegen). Security updates for these still open PRs via `security-all`.
+
+### Repo settings (one-time)
+
+Under **Settings → Code security and analysis**, enable:
+
+- Dependabot alerts
+- Dependabot security updates
+- Grouped security updates
+
+Optional **auto-triage** (Settings → Dependabot): auto-dismiss low severity on development dependencies; keep high/critical and production alerts active.
+
+### Merging Dependabot PRs
+
+Before merge:
+
+```bash
+vp test && vp check && vp pack && vp pm audit -- --prod
+```
+
+Close without merging when:
+
+- A version PR tries to bump `@hey-api/openapi-ts` despite ignore (misconfiguration)
+- A major toolchain bump needs deliberate testing (especially Vite+ / codegen)
+
+Security PRs bypass the monthly/quarterly schedule and cooldown.
+
 ## Publishing
 
 `main` is protected — changes land via reviewed PRs only.
@@ -118,6 +167,8 @@ scripts/
 docs/
   BUGS.md                 # Verified upstream API defects
   MAINTAINERS.md          # This file
+.github/
+  dependabot.yml          # Dependency update schedule
 ```
 
 ## Related docs
