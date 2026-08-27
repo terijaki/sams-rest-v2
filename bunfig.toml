@@ -1,0 +1,4 @@
+[install]
+# Only install package versions published at least 3 days ago (259200 seconds).
+# Applies to `bun install` / `vp install` (Vite+ delegates to Bun).
+minimumReleaseAge = 259200
