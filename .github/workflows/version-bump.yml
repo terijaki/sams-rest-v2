@@ -1,11 +1,11 @@
 name: Version bump
 
+name: Version bump
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
-    paths:
-      - "src/**"
 
 permissions:
   contents: write
@@ -30,7 +30,43 @@ jobs:
         id: check
         run: |
           git fetch origin main
+          if git diff --quiet origin/main...HEAD -- src/; then
+            echo "state=skip_no_src" >> "$GITHUB_OUTPUT"
+            echo "No src/ changes vs main, skipping version bump."
+            exit 0
+          fi
           if git cat-file -e "origin/main:package.json" 2>/dev/null; then
+            MAIN_VERSION=$(git show origin/main:package.json | node -pe "JSON.parse(require('fs').readFileSync(0)).version")
+          else
+            # First release: main has no package yet; any version on the PR is fine.
+            MAIN_VERSION="0.0.0"
+          fi
+          HEAD_VERSION=$(node -pe "require('./package.json').version")
+          echo "main_version=$MAIN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "head_version=$HEAD_VERSION" >> "$GITHUB_OUTPUT"
+          node -e "
+            const main = process.argv[1].split('.').map(Number);
+            const head = process.argv[2].split('.').map(Number);
+            const cmp = (a, b) => {
+              for (let i = 0; i < 3; i++) {
+                if (a[i] !== b[i]) return a[i] - b[i];
+              }
+              return 0;
+            };
+            process.stdout.write(cmp(head, main) > 0 ? 'already_bumped' : 'needs_bump');
+          " "$MAIN_VERSION" "$HEAD_VERSION" > /tmp/bump-state.txt
+          echo "state=$(cat /tmp/bump-state.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Bump patch version
+        if: steps.check.outputs.state == 'needs_bump'
+        run: |
+          npm version patch --no-git-tag-version
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore(release): bump version for publish"
+          git push origin HEAD:${{ github.head_ref }}
+
             MAIN_VERSION=$(git show origin/main:package.json | node -pe "JSON.parse(require('fs').readFileSync(0)).version")
           else
             # First release: main has no package yet; any version on the PR is fine.

@@ -85,12 +85,12 @@ These are **separate** — configuring one does not configure the other.
 
 Job names use a `Category: detail` schema (e.g. `Test: unit`, `Release: version bump`).
 
-| Workflow           | Trigger                      | Jobs                                                                                                      | Purpose                                                                                                       |
-| ------------------ | ---------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`           | PR                           | `Test: unit`, `Test: live API`                                                                            | Unit: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; live: `vp test src/live` with `SAMS_API_KEY` |
-| `version-bump.yml` | PR opened/updated (`src/**`) | `Release: version bump`                                                                                   | Patch-bump `package.json` on PR branch when the PR touches `src/`                                             |
-| `publish.yml`      | Merge to `main`              | `Test: verify`, `Release: publish`                                                                        | Verify (unit + pack + live API) → `npm publish` (OIDC) and git tag/release only if the version is new on npm  |
-| `weekly.yml`       | Saturday cron / manual       | `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify` | Swagger drift, live bugs, regenerate/verify, drift PR, actionable notifications                               |
+| Workflow           | Trigger                | Jobs                                                                                                      | Purpose                                                                                                           |
+| ------------------ | ---------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`           | PR                     | `Test: unit`, `Test: live API`                                                                            | Unit: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; live: `vp test src/live` with `SAMS_API_KEY`     |
+| `version-bump.yml` | PR opened/updated      | `Release: version bump`                                                                                   | Patch-bump `package.json` on PR branch when the PR touches `src/` (job always runs so branch protection can pass) |
+| `publish.yml`      | Merge to `main`        | `Test: verify`, `Release: publish`                                                                        | Verify (unit + pack + live API) → `npm publish` (OIDC) and git tag/release only if the version is new on npm      |
+| `weekly.yml`       | Saturday cron / manual | `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify` | Swagger drift, live bugs, regenerate/verify, drift PR, actionable notifications                                   |
 
 ### Weekly health check
 
@@ -156,7 +156,7 @@ Security PRs bypass the monthly/quarterly schedule and cooldown.
 
 `main` is protected — changes land via reviewed PRs only.
 
-1. **Version bump** — `version-bump.yml` runs only when the PR changes `src/**`, then patch-bumps the PR branch if the version is not already above `main`. Tooling, workflow, and docs PRs do not bump.
+1. **Version bump** — `version-bump.yml` always runs on PRs (required check), but only patch-bumps when the PR changes `src/` and the version is not already above `main`. Tooling, workflow, and docs PRs do not bump.
 2. **CI on PR** — `ci.yml` gates merge via branch protection
 3. **Publish on merge** — `publish.yml` runs chained verify job then publish (not parallel with `ci.yml`) only when `package.json` version differs from `npm view sams-rest-v2 version`; otherwise it skips `npm publish` and git tag/release. GitHub release notes use the merged PR's `## Summary` section when present, otherwise GitHub auto-generated notes
 
