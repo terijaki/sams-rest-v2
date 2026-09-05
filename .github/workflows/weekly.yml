@@ -109,9 +109,9 @@ jobs:
     name: "Health: bug probes"
     runs-on: ubuntu-latest
     outputs:
-      has_fixed: ${{ steps.parse.outputs.has_fixed }}
-      fixed_bug_ids: ${{ steps.parse.outputs.fixed_bug_ids }}
-      check_failed_ids: ${{ steps.parse.outputs.check_failed_ids }}
+      has_fixed: ${{ steps.bugs.outputs.has_fixed }}
+      fixed_bug_ids: ${{ steps.bugs.outputs.fixed_bug_ids }}
+      check_failed_ids: ${{ steps.bugs.outputs.check_failed_ids }}
     steps:
       - uses: actions/checkout@v7
 
@@ -120,50 +120,14 @@ jobs:
           node-version: "25"
           cache: true
 
+      # Do not redirect `vp run bugs` stdout. Vite+ prints a command banner
+      # (`$ bun ./scripts/check-sams-bugs.ts`) that is not valid JSON.
+      # The script writes job outputs to $GITHUB_OUTPUT and the step summary.
       - name: Run bug checks
+        id: bugs
         env:
           SAMS_API_KEY: ${{ secrets.SAMS_API_KEY }}
-        run: vp run bugs > bug-results.json
-
-      - name: Parse results and set outputs
-        id: parse
-        run: |
-          node -e "
-            const fs = require('fs');
-            const data = JSON.parse(fs.readFileSync('bug-results.json', 'utf8'));
-
-            const fixedIds = data.bugs.filter(b => b.status === 'fixed').map(b => String(b.id));
-            const failedIds = data.bugs.filter(b => b.status === 'check_failed').map(b => String(b.id));
-
-            const lines = [
-              'has_fixed=' + (fixedIds.length > 0 ? 'true' : 'false'),
-              'fixed_bug_ids=' + fixedIds.join(','),
-              'check_failed_ids=' + failedIds.join(','),
-            ];
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, lines.join('\\n') + '\\n');
-          "
-
-      - name: Write step summary
-        run: |
-          node -e "
-            const fs = require('fs');
-            const data = JSON.parse(fs.readFileSync('bug-results.json', 'utf8'));
-            const icon = { fixed: '✅', still_present: '⚠️', check_failed: '❌' };
-            const label = { fixed: 'Fixed', still_present: 'Still present', check_failed: 'Check failed' };
-            const rows = data.bugs.map(b =>
-              '| ' + [b.id, b.slug, b.summary, icon[b.status] + ' ' + label[b.status]].join(' | ') + ' |'
-            );
-            const lines = [
-              '## Bug check results',
-              '',
-              '| # | Slug | Bug | Status |',
-              '|---|---|---|---|',
-              ...rows,
-              '',
-              '_Checked at: ' + data.checkedAt + '_',
-            ];
-            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\\n') + '\\n');
-          "
+        run: vp run bugs
 
   regenerate:
     name: "Health: regenerate"

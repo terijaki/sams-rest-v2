@@ -65,10 +65,10 @@ Baseline endpoint manifest (`src/test-support/baseline-endpoints.ts`): SDK opera
 
 ### Tests vs scripts
 
-| Kind                                                               | Examples                                                | Role                                                                          |
-| ------------------------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)          | unit, MSW contract, live graph, live smoke, live roster | Pass/fail gates — fail CI on regression                                       |
-| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`) | JSON reports, codegen, workflow glue                    | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only |
+| Kind                                                               | Examples                                                | Role                                                                                                                                                                       |
+| ------------------------------------------------------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)          | unit, MSW contract, live graph, live smoke, live roster | Pass/fail gates — fail CI on regression                                                                                                                                    |
+| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`) | JSON reports, codegen, workflow glue                    | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only. `vp run bugs` writes Actions outputs to `$GITHUB_OUTPUT` — do not parse its stdout as JSON. |
 
 Upstream defect registry: `src/upstream/bugs.ts` (slug + numeric id). Live probe implementations: `src/upstream/bug-probes.ts`. Human-readable catalogue: [BUGS.md](BUGS.md). Prefer **slug** in code comments; numeric **#** remains in weekly reports for history.
 
@@ -97,7 +97,7 @@ Job names use a `Category: detail` schema (e.g. `Test: unit`, `Release: version 
 Jobs: `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify`.
 
 1. **Swagger drift** — regenerate without key, semantically compare `src/generated/source.json`
-2. **Bug check** — `vp run bugs` with `SAMS_API_KEY`
+2. **Bug check** — `vp run bugs` with `SAMS_API_KEY` (writes `$GITHUB_OUTPUT` / step summary; do not redirect stdout — Vite+ prints a command banner)
 3. **Regenerate & verify** — `vp run generate`, `vp check`, `vp test`, `vp pack`
 4. **Drift PR** — opens `sams-swagger-drift` branch when upstream changed
 
@@ -185,6 +185,8 @@ src/
 scripts/
   generate-client.ts      # Codegen entrypoint
   check-sams-bugs.ts      # Thin CLI for vp run bugs
+  sams-bug-check.ts       # GitHub output helpers for bug probes
+  sams-health-notify.ts   # Weekly notify issue body
   check-sams-swagger-drift.ts
 docs/
   BUGS.md                 # Verified upstream API defects
