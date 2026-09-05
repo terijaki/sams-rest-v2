@@ -4,8 +4,7 @@
  * Invoked by .github/workflows/weekly.yml (notify job).
  */
 
-import { UPSTREAM_BUGS } from "../src/upstream/bugs";
-import { buildSwaggerDriftSection } from "./sams-swagger-drift";
+import { buildHealthNotifyIssue } from "./sams-health-notify";
 
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -20,89 +19,22 @@ const [owner, repo] = repository.split("/");
 const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
 const date = new Date().toISOString().split("T")[0];
 
-const hasDrift = process.env.HAS_DRIFT === "true";
-const hasFixed = process.env.HAS_FIXED === "true";
-const fixedBugIds = (process.env.FIXED_BUG_IDS ?? "").split(",").filter(Boolean).map(Number);
-const checkFailedIds = (process.env.CHECK_FAILED_IDS ?? "").split(",").filter(Boolean).map(Number);
-const regenFailed = process.env.REGEN_FAILED === "true";
-const failureStep = process.env.FAILURE_STEP ?? "";
-const swaggerJobFailed = process.env.SWAGGER_DRIFT_RESULT === "failure";
-const bugCheckJobFailed = process.env.BUG_CHECK_RESULT === "failure";
-const regenJobFailed = process.env.REGENERATE_RESULT === "failure";
-const prDriftJobFailed = process.env.PR_DRIFT_RESULT === "failure";
-const driftPrUrl = process.env.DRIFT_PR_URL ?? "";
-const driftSummaryMarkdown = process.env.DRIFT_SUMMARY_MARKDOWN ?? "";
-
-const probedBugs = UPSTREAM_BUGS.filter((bug) => bug.probed);
-const fixedSet = new Set(fixedBugIds);
-const failedSet = new Set(checkFailedIds);
-const rows = probedBugs.map((bug) => {
-  const status = fixedSet.has(bug.id)
-    ? "✅ Fixed"
-    : failedSet.has(bug.id)
-      ? "❌ Check failed"
-      : "⚠️ Still present";
-  return `| ${bug.id} | \`${bug.slug}\` | ${bug.summary} | ${status} |`;
+const issue = buildHealthNotifyIssue({
+  runUrl,
+  date,
+  hasDrift: process.env.HAS_DRIFT === "true",
+  hasFixed: process.env.HAS_FIXED === "true",
+  fixedBugIds: (process.env.FIXED_BUG_IDS ?? "").split(",").filter(Boolean).map(Number),
+  checkFailedIds: (process.env.CHECK_FAILED_IDS ?? "").split(",").filter(Boolean).map(Number),
+  regenFailed: process.env.REGEN_FAILED === "true",
+  failureStep: process.env.FAILURE_STEP ?? "",
+  swaggerJobFailed: process.env.SWAGGER_DRIFT_RESULT === "failure",
+  bugCheckJobFailed: process.env.BUG_CHECK_RESULT === "failure",
+  regenJobFailed: process.env.REGENERATE_RESULT === "failure",
+  prDriftJobFailed: process.env.PR_DRIFT_RESULT === "failure",
+  driftPrUrl: process.env.DRIFT_PR_URL ?? "",
+  driftSummaryMarkdown: process.env.DRIFT_SUMMARY_MARKDOWN ?? "",
 });
-const bugTable = ["| # | Slug | Bug | Status |", "|---|---|---|---|", ...rows].join("\n");
-
-const sections: string[] = [];
-const titleParts: string[] = [];
-
-if (hasDrift) {
-  titleParts.push("⚠️ swagger drift");
-  sections.push(
-    `${buildSwaggerDriftSection({
-      runUrl,
-      summaryMarkdown: driftSummaryMarkdown,
-    })}
-
-${driftPrUrl ? `A pull request was opened/updated with the regenerated client: ${driftPrUrl}\n\nReview, approve, and merge it. The version-bump workflow will patch-bump on the PR branch; [\`publish.yml\`](${runUrl.replace(/\/runs\/\d+$/, "")}/blob/main/.github/workflows/publish.yml) publishes after merge.` : "Verification passed; check the workflow run for the drift PR link."}`,
-  );
-}
-
-if (hasFixed) {
-  titleParts.push("✅ bugs fixed");
-  sections.push(`## ✅ Upstream Bug(s) Fixed
-
-Bug(s) **${fixedBugIds.join(", ")}** are no longer reproducible against the live API. Review the relevant patches in \`src/codegen/\` and remove workarounds that compensate for the now-fixed behaviour.
-
-${bugTable}`);
-} else {
-  sections.push(`## Bug Check Results\n\n${bugTable}`);
-}
-
-if (regenFailed || regenJobFailed) {
-  titleParts.push("❌ regen failed");
-  sections.push(`## ❌ Regeneration / Verification Failed
-
-The \`${failureStep || "regenerate"}\` step failed after pulling the latest spec. The generated client or test suite may be out of sync with the current upstream API.
-
-[View step output](${runUrl})`);
-}
-
-if (swaggerJobFailed) {
-  titleParts.push("❌ drift check failed");
-  sections.push(
-    `## ❌ Swagger Drift Check Job Failed\n\nThe job itself failed (likely a network or tooling error).\n\n[View run](${runUrl})`,
-  );
-}
-
-if (bugCheckJobFailed) {
-  titleParts.push("❌ bug check failed");
-  sections.push(
-    `## ❌ Bug Check Job Failed\n\nThe job itself failed. Confirm that \`SAMS_API_KEY\` is set as a repository secret.\n\n[View run](${runUrl})`,
-  );
-}
-
-if (prDriftJobFailed) {
-  titleParts.push("❌ drift PR failed");
-  sections.push(
-    `## ❌ Drift PR Failed\n\nSemantic drift was detected and verification passed, but opening/updating the drift pull request failed.\n\n[View run](${runUrl})`,
-  );
-}
-
-const titleSuffix = titleParts.length > 0 ? titleParts.join(" · ") : "action required";
 
 const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
   method: "POST",
@@ -113,8 +45,8 @@ const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issu
     "X-GitHub-Api-Version": "2022-11-28",
   },
   body: JSON.stringify({
-    title: `[SAMS] ${titleSuffix} — ${date}`,
-    body: `${sections.join("\n\n---\n\n")}\n\n---\n\n_Weekly health check · [View run](${runUrl})_`,
+    title: issue.title,
+    body: issue.body,
   }),
 });
 
@@ -124,5 +56,5 @@ if (!response.ok) {
   process.exit(1);
 }
 
-const issue = (await response.json()) as { html_url: string; number: number };
-console.log(`Created issue #${issue.number}: ${issue.html_url}`);
+const created = (await response.json()) as { html_url: string; number: number };
+console.log(`Created issue #${created.number}: ${created.html_url}`);
