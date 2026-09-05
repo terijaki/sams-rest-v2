@@ -28,6 +28,11 @@ jobs:
         id: check
         run: |
           git fetch origin main
+          if git diff --quiet origin/main...HEAD -- src/; then
+            echo "state=skip_no_src" >> "$GITHUB_OUTPUT"
+            echo "No src/ changes vs main, skipping version bump."
+            exit 0
+          fi
           if git cat-file -e "origin/main:package.json" 2>/dev/null; then
             MAIN_VERSION=$(git show origin/main:package.json | node -pe "JSON.parse(require('fs').readFileSync(0)).version")
           else
