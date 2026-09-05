@@ -49,7 +49,6 @@
     "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
     "notify": "bun ./scripts/sams-notify.ts",
     "write-test-summary": "bun ./scripts/write-ci-test-summary.ts",
-    "release-needed": "bun ./scripts/check-package-content-changed.ts",
     "prepublishOnly": "vp pack"
   },
   "dependencies": {
