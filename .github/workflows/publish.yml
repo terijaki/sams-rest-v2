@@ -57,10 +57,22 @@ jobs:
           node-version: "25"
           registry-url: https://registry.npmjs.org
 
+      - name: Install
+        run: vp install --frozen-lockfile
+
+      - name: Skip if this version is already on npm
+        id: release
+        run: |
+          LOCAL=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view sams-rest-v2 version 2>/dev/null || true)
+          vp run release-needed -- --versions "$LOCAL" "$PUBLISHED"
+
       - name: Publish
+        if: steps.release.outputs.needed == 'true'
         run: npm publish --access public --provenance
 
       - name: Create git tag
+        if: steps.release.outputs.needed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

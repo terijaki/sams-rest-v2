@@ -14,7 +14,7 @@ Install dependencies:
 vp install
 ```
 
-Cloud Agents bootstrap via `.cursor/environment.json` (installs `vp`, then `vp install --frozen-lockfile`).
+Cloud Agents bootstrap via `.cursor/environment.json`. The install script downloads Vite+, exports `~/.local/share/vite-plus/bin` on `PATH` in the same shell, then runs `vp install --frozen-lockfile`. Local Cursor does not run this file.
 
 ## Day-to-day commands
 
@@ -88,8 +88,8 @@ Job names use a `Category: detail` schema (e.g. `Test: unit`, `Release: version 
 | Workflow           | Trigger                | Jobs                                                                                                      | Purpose                                                                                                       |
 | ------------------ | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `ci.yml`           | PR                     | `Test: unit`, `Test: live API`                                                                            | Unit: `vp check`, `vp test`, `vp pack`, `vp pm audit -- --prod`; live: `vp test src/live` with `SAMS_API_KEY` |
-| `version-bump.yml` | PR opened/updated      | `Release: version bump`                                                                                   | Patch-bump `package.json` on PR branch                                                                        |
-| `publish.yml`      | Merge to `main`        | `Test: verify`, `Release: publish`                                                                        | Verify (unit + pack + live API) → `npm publish` (OIDC), git tag/release                                       |
+| `version-bump.yml` | PR opened/updated      | `Release: version bump`                                                                                   | Patch-bump `package.json` on PR branch only when published package content changed vs `main`                  |
+| `publish.yml`      | Merge to `main`        | `Test: verify`, `Release: publish`                                                                        | Verify (unit + pack + live API) → `npm publish` (OIDC) and git tag/release only if the version is new on npm  |
 | `weekly.yml`       | Saturday cron / manual | `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Health: drift PR`, `Health: notify` | Swagger drift, live bugs, regenerate/verify, drift PR, actionable notifications                               |
 
 ### Weekly health check
@@ -156,9 +156,9 @@ Security PRs bypass the monthly/quarterly schedule and cooldown.
 
 `main` is protected — changes land via reviewed PRs only.
 
-1. **Version bump** — automatic on PR branch via `version-bump.yml`
+1. **Version bump** — `version-bump.yml` patch-bumps the PR branch only when published package content changed vs `main` (`src/index.ts`, `src/create-sams-client.ts`, `src/constants.ts`, `src/generated/`, `README.md`, `LICENSE`, `vite.config.ts`, or consumer-facing `package.json` keys). Tooling, workflows, docs, tests, live probes, and codegen patches do not bump. `vp run release-needed` classifies the diff (`scripts/package-content-changed.ts`).
 2. **CI on PR** — `ci.yml` gates merge via branch protection
-3. **Publish on merge** — `publish.yml` runs chained verify job then publish (not parallel with `ci.yml`); GitHub release notes use the merged PR's `## Summary` section when present, otherwise GitHub auto-generated notes
+3. **Publish on merge** — `publish.yml` runs chained verify job then publish (not parallel with `ci.yml`) only when `package.json` version is newer than `npm view sams-rest-v2 version`; otherwise it skips `npm publish` and git tag/release. GitHub release notes use the merged PR's `## Summary` section when present, otherwise GitHub auto-generated notes
 
 Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC from GitHub Actions). **Do not** replace `npm publish` with `bun publish` — bun does not support OIDC trusted publishing yet.
 
@@ -188,6 +188,8 @@ scripts/
   sams-bug-check.ts       # GitHub output helpers for bug probes
   sams-health-notify.ts   # Weekly notify issue body
   check-sams-swagger-drift.ts
+  package-content-changed.ts # Whether a PR should bump / publish
+  check-package-content-changed.ts # CLI for vp run release-needed
 docs/
   BUGS.md                 # Verified upstream API defects
   MAINTAINERS.md          # This file

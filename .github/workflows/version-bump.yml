@@ -24,6 +24,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "25"
+          cache: true
+
+      - name: Install
+        run: vp install --frozen-lockfile
+
       - name: Skip if version already bumped above main
         id: check
         run: |
@@ -50,8 +58,21 @@ jobs:
           " "$MAIN_VERSION" "$HEAD_VERSION" > /tmp/bump-state.txt
           echo "state=$(cat /tmp/bump-state.txt)" >> "$GITHUB_OUTPUT"
 
-      - name: Bump patch version
+      - name: Detect package content changes
         if: steps.check.outputs.state == 'needs_bump'
+        id: content
+        run: |
+          git diff --name-only origin/main...HEAD > /tmp/changed-paths.txt
+          if git cat-file -e "origin/main:package.json" 2>/dev/null; then
+            git show origin/main:package.json > /tmp/base-package.json
+          else
+            echo '{}' > /tmp/base-package.json
+          fi
+          cp package.json /tmp/head-package.json
+          vp run release-needed -- /tmp/changed-paths.txt /tmp/base-package.json /tmp/head-package.json
+
+      - name: Bump patch version
+        if: steps.check.outputs.state == 'needs_bump' && steps.content.outputs.needed == 'true'
         run: |
           npm version patch --no-git-tag-version
           git config user.name "github-actions[bot]"
