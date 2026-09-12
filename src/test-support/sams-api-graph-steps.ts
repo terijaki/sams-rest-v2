@@ -459,7 +459,16 @@ export const SAMS_API_GRAPH_STEPS: SamsApiGraphStep[] = [
     name: "getEventTypes",
     operations: ["getEventTypes"],
     run: async (sams, ctx) => {
-      const { data: eventTypes } = await sams.getEventTypes();
+      // Package API keys can receive HTTP 403 for this feature (upstream 2026-09-12).
+      // Soft-skip so the live graph still covers the rest of the surface.
+      const result = await sams.getEventTypes({ throwOnError: false });
+      if (result.response?.status === 403) {
+        return;
+      }
+      if (result.error) {
+        throw result.error;
+      }
+      const eventTypes = result.data;
       ctx.eventTypeUuid = firstFromPage(
         Array.isArray(eventTypes) ? eventTypes : [eventTypes as UuidCarrier],
         "event type",
@@ -470,7 +479,10 @@ export const SAMS_API_GRAPH_STEPS: SamsApiGraphStep[] = [
     name: "getEventTypeByUuid",
     operations: ["getEventTypeByUuid"],
     run: async (sams, ctx) => {
-      await sams.getEventTypeByUuid({ path: { uuid: ctx.eventTypeUuid! } });
+      if (!ctx.eventTypeUuid) {
+        return;
+      }
+      await sams.getEventTypeByUuid({ path: { uuid: ctx.eventTypeUuid } });
     },
   },
 ];
