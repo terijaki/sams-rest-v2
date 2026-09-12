@@ -215,3 +215,5 @@ Note that the `time` is a separate string field (`HH:mm`), confirming the intent
 
 **Impact:** Generated Zod validator rejects valid responses (`expected object, received array`).  
 **Workaround:** Patch operation `GET /event-types` response to `{ type: array, items: { $ref: EventType } }` in `src/codegen/operation-patches.ts`. Live probe: `event-types-array-response` (`vp run bugs`).
+
+**Probe note (2026-09-12):** Live `GET /event-types` now returns HTTP 403 (`API key does not have permission to access this feature`) for the package API key, so the weekly probe reports `check_failed` and cannot reconfirm the array shape. The upstream swagger still declares a single `EventType` object, so the operation patch remains necessary.

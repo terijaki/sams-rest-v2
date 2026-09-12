@@ -99,7 +99,9 @@ Jobs: `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Heal
 1. **Swagger drift** — regenerate without key, semantically compare `src/generated/source.json`
 2. **Bug check** — `vp run bugs` with `SAMS_API_KEY` (writes `$GITHUB_OUTPUT` / step summary; do not redirect stdout — Vite+ prints a command banner)
 3. **Regenerate & verify** — `vp run generate`, `vp check`, `vp test`, `vp pack`
-4. **Drift PR** — opens `sams-swagger-drift` branch when upstream changed
+4. **Drift PR** — pushes `sams-swagger-drift` and opens a PR when upstream changed
+
+**Required repo setting for step 4:** Settings → Actions → General → Workflow permissions → enable **Allow GitHub Actions to create and approve pull requests**. Without it, the branch is pushed but `gh pr create` fails with `GitHub Actions is not permitted to create or approve pull requests` (see issue #21).
 
 ## Dependabot
 

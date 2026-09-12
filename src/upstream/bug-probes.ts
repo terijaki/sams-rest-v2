@@ -487,7 +487,10 @@ const bugProbes: Partial<Record<UpstreamBugSlug, BugProbe>> = {
         return bugResult(
           "event-types-array-response",
           "check_failed",
-          `HTTP ${eventTypesRes.status} fetching event-types`,
+          `HTTP ${eventTypesRes.status} fetching event-types` +
+            (eventTypesRes.status === 403
+              ? " (API key lacks permission for this feature)"
+              : ""),
         );
       }
       const eventTypes = (await eventTypesRes.json()) as unknown;
