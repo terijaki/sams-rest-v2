@@ -737,6 +737,33 @@ export type VolleyballMatchSetRestDto = {
     duration?: number;
 };
 
+export type MatchPerformanceIndicatorDto = {
+    name?: string;
+    localizedName?: string;
+    value?: number;
+};
+
+export type MatchTeamStatisticsDto = {
+    /**
+     * Entity unique identifier
+     */
+    uuid?: string;
+    _links?: Links;
+    _embedded?: Embedded;
+    attributes?: {
+        [key: string]: JsonNode;
+    };
+    teamName?: string;
+    players?: Array<PlayerMatchStatisticsDto>;
+};
+
+export type PlayerMatchStatisticsDto = {
+    uuid?: string;
+    firstName?: string;
+    lastName?: string;
+    indicators?: Array<MatchPerformanceIndicatorDto>;
+};
+
 export type LeagueMatchDayDto = {
     /**
      * Entity unique identifier
@@ -2167,6 +2194,55 @@ export type GetCompetitionMatchByUuidResponses = {
 
 export type GetCompetitionMatchByUuidResponse = GetCompetitionMatchByUuidResponses[keyof GetCompetitionMatchByUuidResponses];
 
+export type GetCompetitionMatchStatisticsData = {
+    body?: never;
+    headers?: {
+        /**
+         * A SAMS API key with permission to access this API.
+         */
+        'X-Api-Key'?: string;
+    };
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/competition-matches/{uuid}/statistics';
+};
+
+export type GetCompetitionMatchStatisticsErrors = {
+    /**
+     * POST only: A violation occurred while validating the processed request data, for example caused by an invalid email address. Check the response for further details.
+     */
+    400: ValidationError;
+    /**
+     * API authorization failed.
+     */
+    403: ResponseExceptionMessage;
+    /**
+     * Competition match not found
+     */
+    404: unknown;
+    /**
+     * The request could not be processed due to invalid request data. Check the response for more details.
+     */
+    409: ResponseExceptionMessage;
+    /**
+     * An unexpected error occurred. Please contact support and supply the response data.
+     */
+    500: ResponseException;
+};
+
+export type GetCompetitionMatchStatisticsError = GetCompetitionMatchStatisticsErrors[keyof GetCompetitionMatchStatisticsErrors];
+
+export type GetCompetitionMatchStatisticsResponses = {
+    /**
+     * Successful operation
+     */
+    200: Array<MatchTeamStatisticsDto>;
+};
+
+export type GetCompetitionMatchStatisticsResponse = GetCompetitionMatchStatisticsResponses[keyof GetCompetitionMatchStatisticsResponses];
+
 export type GetAllMatchGroupsData = {
     body?: never;
     headers?: {
@@ -2705,6 +2781,55 @@ export type GetLeagueMatchByUuidResponses = {
 };
 
 export type GetLeagueMatchByUuidResponse = GetLeagueMatchByUuidResponses[keyof GetLeagueMatchByUuidResponses];
+
+export type GetLeagueMatchStatisticsData = {
+    body?: never;
+    headers?: {
+        /**
+         * A SAMS API key with permission to access this API.
+         */
+        'X-Api-Key'?: string;
+    };
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/league-matches/{uuid}/statistics';
+};
+
+export type GetLeagueMatchStatisticsErrors = {
+    /**
+     * POST only: A violation occurred while validating the processed request data, for example caused by an invalid email address. Check the response for further details.
+     */
+    400: ValidationError;
+    /**
+     * API authorization failed.
+     */
+    403: ResponseExceptionMessage;
+    /**
+     * League match not found
+     */
+    404: unknown;
+    /**
+     * The request could not be processed due to invalid request data. Check the response for more details.
+     */
+    409: ResponseExceptionMessage;
+    /**
+     * An unexpected error occurred. Please contact support and supply the response data.
+     */
+    500: ResponseException;
+};
+
+export type GetLeagueMatchStatisticsError = GetLeagueMatchStatisticsErrors[keyof GetLeagueMatchStatisticsErrors];
+
+export type GetLeagueMatchStatisticsResponses = {
+    /**
+     * Successful operation
+     */
+    200: Array<MatchTeamStatisticsDto>;
+};
+
+export type GetLeagueMatchStatisticsResponse = GetLeagueMatchStatisticsResponses[keyof GetLeagueMatchStatisticsResponses];
 
 export type GetAllMatchDaysData = {
     body?: never;

@@ -116,6 +116,30 @@ export const zVolleyballMatchResultsDto = z.object({
     sets: z.array(zVolleyballMatchSetRestDto).nullish()
 });
 
+export const zMatchPerformanceIndicatorDto = z.object({
+    name: z.string().optional(),
+    localizedName: z.string().optional(),
+    value: z.number().optional()
+});
+
+export const zPlayerMatchStatisticsDto = z.object({
+    uuid: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    indicators: z.array(zMatchPerformanceIndicatorDto).optional()
+});
+
+export const zMatchTeamStatisticsDto = z.object({
+    uuid: z.string().register(z.globalRegistry, {
+        description: 'Entity unique identifier'
+    }).optional(),
+    _links: zLinks.optional(),
+    _embedded: zEmbedded.optional(),
+    attributes: z.record(z.string(), zJsonNode).optional(),
+    teamName: z.string().optional(),
+    players: z.array(zPlayerMatchStatisticsDto).optional()
+});
+
 export const zSamsScoreAccessCodeDto = z.object({
     accessCode: z.string().optional()
 });
@@ -1225,6 +1249,23 @@ export const zGetCompetitionMatchByUuidPath = z.object({
  */
 export const zGetCompetitionMatchByUuidResponse = zCompetitionMatchDto;
 
+export const zGetCompetitionMatchStatisticsHeaders = z.object({
+    'X-Api-Key': z.string().register(z.globalRegistry, {
+        description: 'A SAMS API key with permission to access this API.'
+    }).optional()
+});
+
+export const zGetCompetitionMatchStatisticsPath = z.object({
+    uuid: z.string()
+});
+
+/**
+ * Successful operation
+ */
+export const zGetCompetitionMatchStatisticsResponse = z.array(zMatchTeamStatisticsDto).register(z.globalRegistry, {
+    description: 'Successful operation'
+});
+
 export const zGetAllMatchGroupsHeaders = z.object({
     'X-Api-Key': z.string().register(z.globalRegistry, {
         description: 'A SAMS API key with permission to access this API.'
@@ -1449,6 +1490,23 @@ export const zGetLeagueMatchByUuidPath = z.object({
  * Successful operation
  */
 export const zGetLeagueMatchByUuidResponse = zLeagueMatchDto;
+
+export const zGetLeagueMatchStatisticsHeaders = z.object({
+    'X-Api-Key': z.string().register(z.globalRegistry, {
+        description: 'A SAMS API key with permission to access this API.'
+    }).optional()
+});
+
+export const zGetLeagueMatchStatisticsPath = z.object({
+    uuid: z.string()
+});
+
+/**
+ * Successful operation
+ */
+export const zGetLeagueMatchStatisticsResponse = z.array(zMatchTeamStatisticsDto).register(z.globalRegistry, {
+    description: 'Successful operation'
+});
 
 export const zGetAllMatchDaysHeaders = z.object({
     'X-Api-Key': z.string().register(z.globalRegistry, {
