@@ -1949,6 +1949,91 @@
         }
       }
     },
+    "/competition-matches/{uuid}/statistics": {
+      "get": {
+        "tags": [
+          "SAMS competition matches API"
+        ],
+        "summary": "Returns player statistics grouped by team for a competition match identified by the given UUID",
+        "operationId": "getCompetitionMatchStatistics",
+        "parameters": [
+          {
+            "name": "X-Api-Key",
+            "in": "header",
+            "description": "A SAMS API key with permission to access this API.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MatchTeamStatisticsDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "POST only: A violation occurred while validating the processed request data, for example caused by an invalid email address. Check the response for further details.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "API authorization failed.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseExceptionMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Competition match not found"
+          },
+          "409": {
+            "description": "The request could not be processed due to invalid request data. Check the response for more details.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseExceptionMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred. Please contact support and supply the response data.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/match-groups": {
       "get": {
         "tags": [
@@ -2882,6 +2967,91 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "The request could not be processed due to invalid request data. Check the response for more details.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseExceptionMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred. Please contact support and supply the response data.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/league-matches/{uuid}/statistics": {
+      "get": {
+        "tags": [
+          "SAMS league matches API"
+        ],
+        "summary": "Returns player statistics grouped by team for a league match identified by the given UUID",
+        "operationId": "getLeagueMatchStatistics",
+        "parameters": [
+          {
+            "name": "X-Api-Key",
+            "in": "header",
+            "description": "A SAMS API key with permission to access this API.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MatchTeamStatisticsDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "POST only: A violation occurred while validating the processed request data, for example caused by an invalid email address. Check the response for further details.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "API authorization failed.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseExceptionMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "League match not found"
           },
           "409": {
             "description": "The request could not be processed due to invalid request data. Check the response for more details.",
@@ -6457,6 +6627,71 @@
           "duration": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "MatchPerformanceIndicatorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "localizedName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "MatchTeamStatisticsDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "Entity unique identifier"
+          },
+          "_links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "_embedded": {
+            "$ref": "#/components/schemas/Embedded"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonNode"
+            }
+          },
+          "teamName": {
+            "type": "string"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerMatchStatisticsDto"
+            }
+          }
+        }
+      },
+      "PlayerMatchStatisticsDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "indicators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchPerformanceIndicatorDto"
+            }
           }
         }
       },

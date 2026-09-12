@@ -214,4 +214,6 @@ Note that the `time` is a separate string field (`HH:mm`), confirming the intent
 ```
 
 **Impact:** Generated Zod validator rejects valid responses (`expected object, received array`).  
-**Workaround:** Patch operation `GET /event-types` response to `{ type: array, items: { $ref: EventType } }` in `src/codegen/operation-patches.ts`. Live probe: `event-types-array-response` (`vp run bugs`).
+**Workaround:** Patch operation `GET /event-types` response to `{ type: array, items: { $ref: EventType } }` in `src/codegen/operation-patches.ts`.
+
+**Live coverage:** Not probed and not in the API graph. Package API keys often get HTTP 403 for `/event-types` (and `/events`), and the route is association-calendar metadata outside the club-site baseline. The operation patch and SDK methods remain.

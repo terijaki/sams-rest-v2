@@ -104,7 +104,9 @@ export const UPSTREAM_BUGS = [
     slug: "event-types-array-response",
     summary: "GET /event-types returns an array but spec declares a single EventType",
     discovered: "2026-08-27",
-    probed: true,
+    // Documented + codegen-patched only. Not live-probed: package keys often get
+    // HTTP 403, and event types are outside the club-site baseline surface.
+    probed: false,
   },
 ] as const satisfies readonly UpstreamBug[];
 
