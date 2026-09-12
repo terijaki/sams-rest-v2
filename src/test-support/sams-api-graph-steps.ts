@@ -455,36 +455,8 @@ export const SAMS_API_GRAPH_STEPS: SamsApiGraphStep[] = [
       await sams.getLocationByUuid({ path: { uuid: ctx.locationUuid! } });
     },
   },
-  {
-    name: "getEventTypes",
-    operations: ["getEventTypes"],
-    run: async (sams, ctx) => {
-      // Package API keys can receive HTTP 403 for this feature (upstream 2026-09-12).
-      // Soft-skip so the live graph still covers the rest of the surface.
-      const result = await sams.getEventTypes({ throwOnError: false });
-      if (result.response?.status === 403) {
-        return;
-      }
-      if (result.error) {
-        throw result.error;
-      }
-      const eventTypes = result.data;
-      ctx.eventTypeUuid = firstFromPage(
-        Array.isArray(eventTypes) ? eventTypes : [eventTypes as UuidCarrier],
-        "event type",
-      );
-    },
-  },
-  {
-    name: "getEventTypeByUuid",
-    operations: ["getEventTypeByUuid"],
-    run: async (sams, ctx) => {
-      if (!ctx.eventTypeUuid) {
-        return;
-      }
-      await sams.getEventTypeByUuid({ path: { uuid: ctx.eventTypeUuid } });
-    },
-  },
+  // Intentionally omit getEventTypes / getEventTypeByUuid: association calendar
+  // metadata, not club-site baseline, and package API keys often lack access (403).
 ];
 
 /** Unique SDK operation names exercised by the graph (includes fallback calls). */

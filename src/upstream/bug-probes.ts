@@ -465,50 +465,6 @@ const bugProbes: Partial<Record<UpstreamBugSlug, BugProbe>> = {
       return bugResult("matchday-date-format", "check_failed", String(error));
     }
   },
-
-  "event-types-array-response": async (apiKey) => {
-    try {
-      const spec = await fetchSwaggerSpec();
-      if (!spec) {
-        return bugResult(
-          "event-types-array-response",
-          "check_failed",
-          "Failed to fetch swagger.json",
-        );
-      }
-      const paths = spec.paths as Record<string, { get?: { responses?: Record<string, unknown> } }>;
-      const response200 = paths["/event-types"]?.get?.responses?.["200"] as
-        | { content?: Record<string, { schema?: { type?: string; $ref?: string } }> }
-        | undefined;
-      const schema = response200?.content?.["application/hal+json; charset=UTF-8"]?.schema;
-      const specDeclaresObject = Boolean(schema?.$ref) && schema?.type !== "array";
-      const eventTypesRes = await samsGet("/event-types", apiKey);
-      if (!eventTypesRes.ok) {
-        return bugResult(
-          "event-types-array-response",
-          "check_failed",
-          `HTTP ${eventTypesRes.status} fetching event-types` +
-            (eventTypesRes.status === 403 ? " (API key lacks permission for this feature)" : ""),
-        );
-      }
-      const eventTypes = (await eventTypesRes.json()) as unknown;
-      const apiReturnsArray = Array.isArray(eventTypes);
-      const bugPresent = specDeclaresObject && apiReturnsArray;
-      const detail = [
-        specDeclaresObject ? "spec still declares single EventType response" : null,
-        apiReturnsArray ? "API returns JSON array" : null,
-      ]
-        .filter(Boolean)
-        .join("; ");
-      return bugResult(
-        "event-types-array-response",
-        bugPresent ? "still_present" : "fixed",
-        detail || undefined,
-      );
-    } catch (error) {
-      return bugResult("event-types-array-response", "check_failed", String(error));
-    }
-  },
 };
 
 /** Slugs executed by `vp run bugs` (excludes documented-only entries). */

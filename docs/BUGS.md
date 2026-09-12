@@ -214,6 +214,6 @@ Note that the `time` is a separate string field (`HH:mm`), confirming the intent
 ```
 
 **Impact:** Generated Zod validator rejects valid responses (`expected object, received array`).  
-**Workaround:** Patch operation `GET /event-types` response to `{ type: array, items: { $ref: EventType } }` in `src/codegen/operation-patches.ts`. Live probe: `event-types-array-response` (`vp run bugs`).
+**Workaround:** Patch operation `GET /event-types` response to `{ type: array, items: { $ref: EventType } }` in `src/codegen/operation-patches.ts`.
 
-**Probe note (2026-09-12):** Live `GET /event-types` now returns HTTP 403 (`API key does not have permission to access this feature`) for the package API key, so the weekly probe reports `check_failed` and cannot reconfirm the array shape. The upstream swagger still declares a single `EventType` object, so the operation patch remains necessary. The live API graph soft-skips `getEventTypes` / `getEventTypeByUuid` on 403 for the same reason.
+**Live coverage:** Not probed and not in the API graph. Package API keys often get HTTP 403 for `/event-types` (and `/events`), and the route is association-calendar metadata outside the club-site baseline. The operation patch and SDK methods remain.

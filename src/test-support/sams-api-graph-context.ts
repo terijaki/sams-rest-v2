@@ -19,7 +19,6 @@ export type SamsApiGraphContext = {
   associationUuid?: string;
   committeeUuid?: string;
   locationUuid?: string;
-  eventTypeUuid?: string;
 };
 
 export function createSamsApiGraphContext(): SamsApiGraphContext {
