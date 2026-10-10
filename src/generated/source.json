@@ -4839,17 +4839,11 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
+            "$ref": "#/components/schemas/Embedded",
             "nullable": true
           },
           "attributes": {
@@ -4931,16 +4925,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5011,16 +4999,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5125,16 +5107,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5172,17 +5148,11 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
+            "$ref": "#/components/schemas/Embedded",
             "nullable": true
           },
           "attributes": {
@@ -5236,16 +5206,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5283,16 +5247,10 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5334,16 +5292,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5381,10 +5333,7 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
@@ -5460,16 +5409,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5507,17 +5450,11 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
+            "$ref": "#/components/schemas/Embedded",
             "nullable": true
           },
           "attributes": {
@@ -5584,16 +5521,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5631,10 +5562,7 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
@@ -5710,16 +5638,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5757,17 +5679,11 @@
             "nullable": true
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
+            "$ref": "#/components/schemas/Embedded",
             "nullable": true
           },
           "attributes": {
@@ -5810,16 +5726,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5856,16 +5766,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5903,16 +5807,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5949,16 +5847,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -5989,16 +5881,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -6036,17 +5922,11 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
+            "$ref": "#/components/schemas/Embedded",
             "nullable": true
           },
           "attributes": {
@@ -6177,17 +6057,11 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
+            "$ref": "#/components/schemas/Embedded",
             "nullable": true
           },
           "attributes": {
@@ -6259,16 +6133,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -6306,10 +6174,7 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
@@ -6501,16 +6366,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -6704,17 +6563,11 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            },
+            "$ref": "#/components/schemas/Embedded",
             "nullable": true
           },
           "attributes": {
@@ -6759,16 +6612,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -6809,16 +6656,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -6856,10 +6697,7 @@
             "nullable": false
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            },
+            "$ref": "#/components/schemas/Links",
             "nullable": true
           },
           "_embedded": {
@@ -7051,16 +6889,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -7097,16 +6929,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -7189,16 +7015,10 @@
             "format": "int32"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -7235,16 +7055,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -7283,16 +7097,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -7418,16 +7226,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -7463,16 +7265,10 @@
             "description": "Entity unique identifier"
           },
           "_links": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LinkDto"
-            }
+            "$ref": "#/components/schemas/Links"
           },
           "_embedded": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "$ref": "#/components/schemas/Embedded"
           },
           "attributes": {
             "type": "object",
@@ -7506,14 +7302,6 @@
             "type": "string"
           },
           "refsoftID": {
-            "type": "string"
-          }
-        }
-      },
-      "LinkDto": {
-        "type": "object",
-        "properties": {
-          "href": {
             "type": "string"
           }
         }
