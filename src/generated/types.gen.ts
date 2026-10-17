@@ -30,14 +30,8 @@ export type Association = {
      * Entity unique identifier
      */
     uuid: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -73,14 +67,8 @@ export type Links = {
 export type AssociationResourcePage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -109,14 +97,8 @@ export type Committee = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -160,14 +142,8 @@ export type CommitteeMember = {
 export type CommitteePage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -183,14 +159,8 @@ export type SportsclubDto = {
      * Entity unique identifier
      */
     uuid: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -205,14 +175,8 @@ export type SportsclubDto = {
 export type SportsclubPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -228,14 +192,8 @@ export type LeagueHierarchyDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -250,14 +208,8 @@ export type LeagueHierarchyDto = {
 export type LeagueHierarchyPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -273,9 +225,7 @@ export type CompetitionDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
+    _links?: Links;
     _embedded?: {
         [key: string]: unknown;
     };
@@ -300,14 +250,8 @@ export type CompetitionDto = {
 export type CompetitionPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -323,14 +267,8 @@ export type LeagueDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -348,14 +286,8 @@ export type LeagueDto = {
 export type LeaguePage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -371,9 +303,7 @@ export type SuperCompetitionDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
+    _links?: Links;
     _embedded?: {
         [key: string]: unknown;
     };
@@ -398,14 +328,8 @@ export type SuperCompetitionDto = {
 export type SuperCompetitionPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -424,14 +348,8 @@ export type Location = {
      * Location unique identifier
      */
     uuid?: string | null;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -444,14 +362,8 @@ export type Location = {
 export type LocationResourcePage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -467,14 +379,8 @@ export type CompetitionMatchGroupDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -488,14 +394,8 @@ export type CompetitionMatchGroupDto = {
 export type CompetitionMatchGroupPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -511,14 +411,8 @@ export type CompetitionMatchGroupRankingsDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -529,14 +423,8 @@ export type CompetitionMatchGroupRankingsDto = {
 export type CompetitionRankingsResourcePage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -552,14 +440,8 @@ export type LeagueRankingsEntryDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -591,14 +473,8 @@ export type TeamDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -618,14 +494,8 @@ export type TeamDto = {
 export type TeamPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -641,9 +511,7 @@ export type CompetitionMatchDto = {
      * Entity unique identifier
      */
     uuid: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
+    _links?: Links;
     _embedded?: {
         team1?: {
             uuid: string;
@@ -688,14 +556,8 @@ export type CompetitionMatchDto = {
 export type CompetitionMatchPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -769,14 +631,8 @@ export type LeagueMatchDayDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    } | null;
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     } | null;
@@ -790,14 +646,8 @@ export type LeagueMatchDayDto = {
 export type LeagueMatchDayPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -811,14 +661,8 @@ export type LeagueMatchDayPage = {
 export type LeagueRankingsResourcePage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -834,9 +678,7 @@ export type LeagueMatchDto = {
      * Entity unique identifier
      */
     uuid: string;
-    _links?: {
-        [key: string]: LinkDto;
-    } | null;
+    _links?: Links;
     _embedded?: {
         team1?: {
             uuid: string;
@@ -881,14 +723,8 @@ export type LeagueMatchDto = {
 export type LeagueMatchPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -904,14 +740,8 @@ export type Event = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -951,14 +781,8 @@ export type Event = {
 export type EventPage = {
     totalElements?: number;
     numberOfElements?: number;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -977,14 +801,8 @@ export type EventType = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -1003,14 +821,8 @@ export type SeasonDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -1051,14 +863,8 @@ export type TeamRosterDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -1073,14 +879,8 @@ export type UserDetailsDto = {
      * Entity unique identifier
      */
     uuid?: string;
-    _links?: {
-        [key: string]: LinkDto;
-    };
-    _embedded?: {
-        [key: string]: {
-            [key: string]: unknown;
-        };
-    };
+    _links?: Links;
+    _embedded?: Embedded;
     attributes?: {
         [key: string]: JsonNode;
     };
@@ -1091,10 +891,6 @@ export type UserDetailsDto = {
     emailAddress?: string;
     samsInstance?: string;
     refsoftID?: string;
-};
-
-export type LinkDto = {
-    href?: string;
 };
 
 export type GetApiBaseLinksData = {
