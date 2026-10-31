@@ -13,7 +13,7 @@ import { schemaPatches } from "../src/codegen/schema-patches";
 import { operationPatches } from "../src/codegen/operation-patches";
 
 if (process.env.SAMS_API_KEY) {
-  // Keep the key out of codegen HTTP headers/logs even if it is present in the environment.
+  // Belt-and-suspenders with package.json `env -u SAMS_API_KEY` on `vp run generate`.
   delete process.env.SAMS_API_KEY;
 }
 

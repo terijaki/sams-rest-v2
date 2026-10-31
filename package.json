@@ -42,7 +42,7 @@
     "provenance": true
   },
   "scripts": {
-    "generate": "bun ./scripts/generate-client.ts",
+    "generate": "env -u SAMS_API_KEY bun ./scripts/generate-client.ts",
     "test:api": "SAMS_LIVE=1 vp test src/live",
     "bugs": "bun ./scripts/check-sams-bugs.ts",
     "smoke": "SAMS_LIVE=1 vp test src/live/sams-smoke.live.test.ts",

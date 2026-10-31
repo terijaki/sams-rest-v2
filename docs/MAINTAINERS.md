@@ -37,10 +37,10 @@ TypeScript maintenance scripts run via **bun** (`bun ./scripts/...`), invoked th
 
 ## Codegen
 
-Regenerate from the **public** swagger document. Never pass `SAMS_API_KEY` to codegen — swagger fetch is unauthenticated.
+Regenerate from the **public** swagger document. Codegen must not see `SAMS_API_KEY` — swagger fetch is unauthenticated. The `generate` package script runs `env -u SAMS_API_KEY`, and `scripts/generate-client.ts` deletes the variable if it is still set (e.g. when invoking `bun ./scripts/generate-client.ts` directly on Windows).
 
 ```bash
-env -u SAMS_API_KEY vp run generate
+vp run generate
 ```
 
 - OpenAPI URL: `https://www.volleyball-baden.de/api/v2/swagger.json`

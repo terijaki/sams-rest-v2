@@ -29,7 +29,7 @@ TypeScript scripts in `scripts/` are executed by **bun** via `package.json` scri
 `SAMS_API_KEY` is a **runtime secret** for live API calls.
 
 - **Never** log, commit, print, or echo the key
-- **Never** pass it to `vp run generate` / swagger fetch (public spec)
+- **Never** pass it to swagger fetch / codegen (public spec). `vp run generate` unsets `SAMS_API_KEY` in the package script; `scripts/generate-client.ts` also removes it if still present.
 - Cloud Agent secrets are snapshotted at run start — a new agent run is needed after secret changes
 - Cursor My Secrets ≠ GitHub Actions secrets (both may need separate configuration)
 
@@ -67,7 +67,7 @@ When asked to verify the package or an issue:
 vp install --frozen-lockfile
 vp test && vp check && vp pack
 vp pm audit -- --prod                 # shipped deps only; full audit may fail on dev tooling
-env -u SAMS_API_KEY vp run generate   # must not use API key
+vp run generate                     # unsets SAMS_API_KEY in package script; safe even if key is in env
 vp run bugs                           # needs SAMS_API_KEY
 vp run smoke                          # needs SAMS_API_KEY; fails on HTTP 403
 ```
@@ -90,7 +90,7 @@ Dependabot opens grouped PRs per [`.github/dependabot.yml`](.github/dependabot.y
 ### Regenerate after swagger change
 
 ```bash
-env -u SAMS_API_KEY vp run generate
+vp run generate
 vp check && vp test && vp pack
 # commit src/generated/ if changed
 ```
