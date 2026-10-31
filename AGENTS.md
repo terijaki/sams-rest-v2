@@ -67,7 +67,7 @@ When asked to verify the package or an issue:
 vp install --frozen-lockfile
 vp test && vp check && vp pack
 vp pm audit -- --prod                 # shipped deps only; full audit may fail on dev tooling
-env -u SAMS_API_KEY vp run generate   # must not use API key
+vp run generate                       # public swagger only
 vp run bugs                           # needs SAMS_API_KEY
 vp run smoke                          # needs SAMS_API_KEY; fails on HTTP 403
 ```
@@ -90,7 +90,7 @@ Dependabot opens grouped PRs per [`.github/dependabot.yml`](.github/dependabot.y
 ### Regenerate after swagger change
 
 ```bash
-env -u SAMS_API_KEY vp run generate
+vp run generate
 vp check && vp test && vp pack
 # commit src/generated/ if changed
 ```
