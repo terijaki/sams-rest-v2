@@ -13,7 +13,6 @@ import { schemaPatches } from "../src/codegen/schema-patches";
 import { operationPatches } from "../src/codegen/operation-patches";
 
 if (process.env.SAMS_API_KEY) {
-  // Belt-and-suspenders with package.json `env -u SAMS_API_KEY` on `vp run generate`.
   delete process.env.SAMS_API_KEY;
 }
 
