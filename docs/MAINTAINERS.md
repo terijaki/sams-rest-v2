@@ -65,10 +65,10 @@ Baseline endpoint manifest (`src/test-support/baseline-endpoints.ts`): SDK opera
 
 ### Tests vs scripts
 
-| Kind                                                               | Examples                                                | Role                                                                                                                                                                       |
-| ------------------------------------------------------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)          | unit, MSW contract, live graph, live smoke, live roster | Pass/fail gates — fail CI on regression                                                                                                                                    |
-| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`) | JSON reports, codegen, workflow glue                    | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only. `vp run bugs` writes Actions outputs to `$GITHUB_OUTPUT` — do not parse its stdout as JSON. |
+| Kind                                                                               | Examples                                                | Role                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vitest** (`vp test`, `vp run test:api`, `vp run smoke`)                          | unit, MSW contract, live graph, live smoke, live roster | Pass/fail gates — fail CI on regression                                                                                                                                    |
+| **Scripts** (`vp run bugs`, `generate`, `swagger:drift`, `notify`, `notify:close`) | JSON reports, codegen, workflow glue                    | `bugs` always exits 0 (a fixed upstream bug is good news); weekly health only. `vp run bugs` writes Actions outputs to `$GITHUB_OUTPUT` — do not parse its stdout as JSON. |
 
 Upstream defect registry: `src/upstream/bugs.ts` (slug + numeric id). Live probe implementations: `src/upstream/bug-probes.ts`. Human-readable catalogue: [BUGS.md](BUGS.md). Prefer **slug** in code comments; numeric **#** remains in weekly reports for history.
 
@@ -99,7 +99,8 @@ Jobs: `Health: swagger drift`, `Health: bug probes`, `Health: regenerate`, `Heal
 1. **Swagger drift** — regenerate without key, semantically compare `src/generated/source.json`
 2. **Bug check** — `vp run bugs` with `SAMS_API_KEY` (writes `$GITHUB_OUTPUT` / step summary; do not redirect stdout — Vite+ prints a command banner)
 3. **Regenerate & verify** — `vp run generate`, `vp check`, `vp test`, `vp pack`
-4. **Drift PR** — pushes `sams-swagger-drift` and opens a PR when upstream changed
+4. **Drift PR** — pushes `sams-swagger-drift` from current `main` with **only** `src/generated/` changes (`vp install --frozen-lockfile` before commit)
+5. **Notify** — upserts a **single** open issue labeled `sams-health` (updates the lowest-number open `[SAMS]` issue and closes duplicate trackers). When the run is fully green with no drift and no newly fixed bugs, `vp run notify:close` closes open trackers until the next actionable run.
 
 **Required repo setting for step 4:** Settings → Actions → General → Workflow permissions → enable **Allow GitHub Actions to create and approve pull requests**. Without it, the branch is pushed but `gh pr create` fails with `GitHub Actions is not permitted to create or approve pull requests` (see issue #21).
 
@@ -188,7 +189,7 @@ scripts/
   generate-client.ts      # Codegen entrypoint
   check-sams-bugs.ts      # Thin CLI for vp run bugs
   sams-bug-check.ts       # GitHub output helpers for bug probes
-  sams-health-notify.ts   # Weekly notify issue body
+  health-notify/          # Weekly GitHub issue upsert + close (vp run notify)
   check-sams-swagger-drift.ts
 docs/
   BUGS.md                 # Verified upstream API defects

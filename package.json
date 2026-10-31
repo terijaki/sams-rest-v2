@@ -47,7 +47,8 @@
     "bugs": "bun ./scripts/check-sams-bugs.ts",
     "smoke": "SAMS_LIVE=1 vp test src/live/sams-smoke.live.test.ts",
     "swagger:drift": "bun ./scripts/check-sams-swagger-drift.ts",
-    "notify": "bun ./scripts/sams-notify.ts",
+    "notify": "bun ./scripts/health-notify/sams-notify.ts",
+    "notify:close": "bun ./scripts/health-notify/sams-notify-close.ts",
     "write-test-summary": "bun ./scripts/write-ci-test-summary.ts",
     "prepublishOnly": "vp pack"
   },

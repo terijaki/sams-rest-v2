@@ -1,10 +1,10 @@
 /**
  * Builds the weekly SAMS health-check GitHub issue title and body.
- * Used by scripts/sams-notify.ts.
+ * Used by scripts/health-notify/sams-notify.ts.
  */
 
-import { UPSTREAM_BUGS } from "../src/upstream/bugs";
-import { buildSwaggerDriftSection } from "./sams-swagger-drift";
+import { UPSTREAM_BUGS } from "../../src/upstream/bugs";
+import { buildSwaggerDriftSection } from "../sams-swagger-drift";
 
 export type HealthNotifyInput = {
   runUrl: string;

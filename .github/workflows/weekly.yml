@@ -71,6 +71,9 @@ jobs:
           node-version: "25"
           cache: true
 
+      - name: Install dependencies
+        run: vp install --frozen-lockfile
+
       - name: Restore regenerated client
         uses: actions/download-artifact@v8
         with:
@@ -87,7 +90,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout -B "$BRANCH" origin/main
-          git add src/generated
+          git reset
+          git add -- src/generated/
           if git diff --cached --quiet; then
             echo "No generated-file changes after artifact restore."
             exit 0
@@ -203,7 +207,14 @@ jobs:
           node-version: "25"
           cache: true
 
-      - name: Create GitHub issue
+      - name: Ensure health check labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create sams-health --color FA8258 --description "Weekly SAMS health check tracker" 2>/dev/null || true
+          gh label create swagger-drift --color FBCA04 --description "Upstream OpenAPI spec drift" 2>/dev/null || true
+
+      - name: Upsert health GitHub issue
         if: |
           needs.swagger-drift.outputs.has_drift == 'true' ||
           needs.bug-check.outputs.has_fixed == 'true' ||
@@ -227,3 +238,16 @@ jobs:
           PR_DRIFT_RESULT: ${{ needs.pr-drift.result }}
           DRIFT_PR_URL: ${{ needs.pr-drift.outputs.pr_url }}
         run: vp run notify
+
+      - name: Close health tracker when all clear
+        if: |
+          needs.swagger-drift.result == 'success' &&
+          needs.bug-check.result == 'success' &&
+          needs.regenerate.result == 'success' &&
+          needs.swagger-drift.outputs.has_drift != 'true' &&
+          needs.bug-check.outputs.has_fixed != 'true' &&
+          needs.regenerate.outputs.failed != 'true' &&
+          (needs.pr-drift.result == 'success' || needs.pr-drift.result == 'skipped')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: vp run notify:close
