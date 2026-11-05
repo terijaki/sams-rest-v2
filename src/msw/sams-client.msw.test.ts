@@ -8,7 +8,7 @@ import { describeSamsApiGraphSuite } from "../test-support/api-graph";
 
 describe("createSamsClient against MSW", () => {
   beforeAll(() => {
-    server.listen({ onUnhandledRequest: "error" });
+    server.listen({ onUnhandledFrame: "error" });
   });
 
   afterEach(() => {

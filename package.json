@@ -1,6 +1,6 @@
 {
   "name": "sams-rest-v2",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Generated fetch SDK, types, and Zod schemas for the SAMS REST API v2.",
   "keywords": [
     "SAMS",
@@ -57,9 +57,9 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.99.0",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@voidzero-dev/vite-plus-core": "1.4.0",
-    "msw": "^2.15.0",
+    "msw": "^3.0.3",
     "typescript": "^6.0.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
     "vite-plus": "1.4.0"
