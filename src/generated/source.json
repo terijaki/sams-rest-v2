@@ -4706,6 +4706,87 @@
         }
       }
     },
+    "/user-details/eternal-uid/{uid}": {
+      "get": {
+        "tags": [
+          "SAMS user API"
+        ],
+        "summary": "Resolves an active or archived Eternal UID to its current user",
+        "operationId": "getUserByEternalUid",
+        "parameters": [
+          {
+            "name": "X-Api-Key",
+            "in": "header",
+            "description": "A SAMS API key with permission to access this API.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/EternalUidResolutionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "POST only: A violation occurred while validating the processed request data, for example caused by an invalid email address. Check the response for further details.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "API authorization failed.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseExceptionMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Eternal UID not found"
+          },
+          "409": {
+            "description": "The request could not be processed due to invalid request data. Check the response for more details.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseExceptionMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred. Please contact support and supply the response data.",
+            "content": {
+              "application/hal+json; charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseException"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/user-details": {
       "get": {
         "tags": [
@@ -7507,6 +7588,23 @@
           },
           "refsoftID": {
             "type": "string"
+          },
+          "eternalUid": {
+            "type": "string"
+          }
+        }
+      },
+      "EternalUidResolutionDto": {
+        "type": "object",
+        "properties": {
+          "userUuid": {
+            "type": "string"
+          },
+          "eternalUid": {
+            "type": "string"
+          },
+          "archivedMatch": {
+            "type": "boolean"
           }
         }
       },

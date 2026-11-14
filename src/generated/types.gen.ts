@@ -1091,6 +1091,13 @@ export type UserDetailsDto = {
     emailAddress?: string;
     samsInstance?: string;
     refsoftID?: string;
+    eternalUid?: string;
+};
+
+export type EternalUidResolutionDto = {
+    userUuid?: string;
+    eternalUid?: string;
+    archivedMatch?: boolean;
 };
 
 export type LinkDto = {
@@ -3775,6 +3782,52 @@ export type GetCurrentUserResponses = {
 };
 
 export type GetCurrentUserResponse = GetCurrentUserResponses[keyof GetCurrentUserResponses];
+
+export type GetUserByEternalUidData = {
+    body?: never;
+    headers?: {
+        /**
+         * A SAMS API key with permission to access this API.
+         */
+        'X-Api-Key'?: string;
+    };
+    path: {
+        uid: string;
+    };
+    query?: never;
+    url: '/user-details/eternal-uid/{uid}';
+};
+
+export type GetUserByEternalUidErrors = {
+    /**
+     * POST only: A violation occurred while validating the processed request data, for example caused by an invalid email address. Check the response for further details.
+     */
+    400: ValidationError;
+    /**
+     * API authorization failed.
+     */
+    403: ResponseExceptionMessage;
+    /**
+     * Eternal UID not found
+     */
+    404: unknown;
+    /**
+     * The request could not be processed due to invalid request data. Check the response for more details.
+     */
+    409: ResponseExceptionMessage;
+    /**
+     * An unexpected error occurred. Please contact support and supply the response data.
+     */
+    500: ResponseException;
+};
+
+export type GetUserByEternalUidError = GetUserByEternalUidErrors[keyof GetUserByEternalUidErrors];
+
+export type GetUserByEternalUidResponses = {
+    200: EternalUidResolutionDto;
+};
+
+export type GetUserByEternalUidResponse = GetUserByEternalUidResponses[keyof GetUserByEternalUidResponses];
 
 export type UserDetailsRootLinksData = {
     body?: never;

@@ -170,6 +170,12 @@ export const zTeamPlayerDto = z.object({
     position: z.string().nullish()
 });
 
+export const zEternalUidResolutionDto = z.object({
+    userUuid: z.string().optional(),
+    eternalUid: z.string().optional(),
+    archivedMatch: z.boolean().optional()
+});
+
 export const zLinkDto = z.object({
     href: z.string().optional()
 });
@@ -802,7 +808,8 @@ export const zUserDetailsDto = z.object({
     ]).optional(),
     emailAddress: z.string().optional(),
     samsInstance: z.string().optional(),
-    refsoftID: z.string().optional()
+    refsoftID: z.string().optional(),
+    eternalUid: z.string().optional()
 });
 
 export const zGetApiBaseLinksHeaders = z.object({
@@ -1854,6 +1861,18 @@ export const zGetCurrentUserHeaders = z.object({
  * Successful operation
  */
 export const zGetCurrentUserResponse = zUserDetailsDto;
+
+export const zGetUserByEternalUidHeaders = z.object({
+    'X-Api-Key': z.string().register(z.globalRegistry, {
+        description: 'A SAMS API key with permission to access this API.'
+    }).optional()
+});
+
+export const zGetUserByEternalUidPath = z.object({
+    uid: z.string()
+});
+
+export const zGetUserByEternalUidResponse = zEternalUidResolutionDto;
 
 export const zUserDetailsRootLinksHeaders = z.object({
     'X-Api-Key': z.string().register(z.globalRegistry, {
